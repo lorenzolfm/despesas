@@ -133,3 +133,43 @@ export function getMonthRange(monthKey: MonthKey): { start: Date; end: Date } {
 export function formatPercent(value: number): string {
 	return `${(value * 100).toFixed(2)}%`;
 }
+
+/**
+ * Alias for formatBRL for consistency
+ */
+export const formatCurrency = formatBRL;
+
+/**
+ * Formats date as relative string (Today, Yesterday, or date)
+ */
+export function formatRelativeDate(date: Date): string {
+	const today = new Date();
+	const yesterday = new Date(today);
+	yesterday.setDate(yesterday.getDate() - 1);
+
+	const isToday = date.toDateString() === today.toDateString();
+	const isYesterday = date.toDateString() === yesterday.toDateString();
+
+	if (isToday) return 'Today';
+	if (isYesterday) return 'Yesterday';
+	return formatDate(date);
+}
+
+/**
+ * Groups transactions by date for timeline display
+ */
+export function groupTransactionsByDate<T extends { date: Date }>(
+	transactions: T[]
+): Map<string, T[]> {
+	const groups = new Map<string, T[]>();
+
+	for (const tx of transactions) {
+		const key = tx.date.toDateString();
+		if (!groups.has(key)) {
+			groups.set(key, []);
+		}
+		groups.get(key)!.push(tx);
+	}
+
+	return groups;
+}
