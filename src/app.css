@@ -1,0 +1,14 @@
+@import 'tailwindcss';
+
+/* Custom theme colors */
+@theme {
+  --color-positive: #1CC29F;
+  --color-negative: #FF652F;
+  --color-primary: #1CC29F;
+  --color-primary-dark: #17a085;
+}
+
+/* Base styles */
+body {
+  @apply bg-gray-50 text-gray-900 font-sans;
+}
