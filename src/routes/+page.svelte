@@ -5,7 +5,6 @@
 	import BalanceHero from '$lib/components/BalanceHero.svelte';
 	import ExpenseForm from '$lib/components/ExpenseForm.svelte';
 	import TransactionTable from '$lib/components/TransactionTable.svelte';
-	import CsvImport from '$lib/components/CsvImport.svelte';
 	import CombinedSummary from '$lib/components/CombinedSummary.svelte';
 	import IndividualSummary from '$lib/components/IndividualSummary.svelte';
 	import { Modal, Button } from '$lib/components/ui';
@@ -111,14 +110,7 @@
 					<BalanceHero monthlyTotals={expenses.monthlyTotals} />
 
 					<!-- Add Transaction Section -->
-					<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-						<div class="lg:col-span-1">
-							<CsvImport />
-						</div>
-						<div class="lg:col-span-2">
-							<ExpenseForm />
-						</div>
-					</div>
+					<ExpenseForm />
 
 					<!-- Transactions List -->
 					<TransactionTable />
