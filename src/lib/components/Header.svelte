@@ -1,11 +1,13 @@
 <script lang="ts">
-  import { Avatar, ThemeToggle } from '$lib/components/ui';
+  import { Avatar, ThemeToggle, Button } from '$lib/components/ui';
 
   interface Props {
     transactionCount: number;
+    isLoading?: boolean;
+    onRefresh?: () => void;
   }
 
-  let { transactionCount }: Props = $props();
+  let { transactionCount, isLoading = false, onRefresh }: Props = $props();
 </script>
 
 <header class="bg-themed border-b border-themed transition-theme">
@@ -22,13 +24,34 @@
         <div>
           <h1 class="text-xl font-bold text-themed">Despesas</h1>
           <p class="text-xs text-themed-secondary">
-            {transactionCount} transaction{transactionCount !== 1 ? 's' : ''}
+            {#if isLoading}
+              <span class="inline-flex items-center gap-1">
+                <svg class="animate-spin h-3 w-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Loading...
+              </span>
+            {:else}
+              {transactionCount} transaction{transactionCount !== 1 ? 's' : ''}
+            {/if}
           </p>
         </div>
       </div>
 
-      <!-- Right side: Avatars and theme toggle -->
+      <!-- Right side: Refresh, Avatars and theme toggle -->
       <div class="flex items-center gap-4">
+        {#if onRefresh}
+          <Button variant="ghost" onclick={onRefresh} disabled={isLoading}>
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 {isLoading ? 'animate-spin' : ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 2v6h-6"/>
+              <path d="M3 12a9 9 0 0 1 15-6.7L21 8"/>
+              <path d="M3 22v-6h6"/>
+              <path d="M21 12a9 9 0 0 1-15 6.7L3 16"/>
+            </svg>
+            <span class="hidden sm:inline">Refresh</span>
+          </Button>
+        {/if}
         <div class="hidden sm:flex items-center gap-2">
           <Avatar name="Lorenzo" size="md" color="lorenzo" />
           <span class="text-themed-secondary">&</span>
