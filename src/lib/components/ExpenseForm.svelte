@@ -2,8 +2,7 @@
 	import type { Owner, ExpenseType } from '$lib/types';
 	import { EXPENSE_TYPES, OWNERS } from '$lib/types';
 	import { useExpenses } from '$lib/stores/expenses.svelte';
-	import { formatDateForInput } from '$lib/utils/format';
-	import { Card, Button, Input, Select, Avatar } from '$lib/components/ui';
+	import { Card, Button, Input, Select, Avatar, DatePicker } from '$lib/components/ui';
 
 	const expenses = useExpenses();
 
@@ -11,55 +10,87 @@
 	let description = $state('');
 	let amount = $state('');
 	let type = $state<ExpenseType>('Household');
-	let date = $state(formatDateForInput(new Date()));
+	let date = $state(new Date());
 
 	let error = $state('');
 	let success = $state(false);
+	let isSubmitting = $state(false);
 
 	const ownerOptions = OWNERS.map((o) => ({ value: o, label: o }));
 	const typeOptions = EXPENSE_TYPES.map((t) => ({ value: t, label: t }));
 
-	function handleSubmit(e: Event) {
+	async function handleSubmit(e: Event) {
 		e.preventDefault();
 		error = '';
 		success = false;
+		isSubmitting = true;
 
 		// Validation
 		if (!description.trim()) {
 			error = 'Description is required';
+			isSubmitting = false;
 			return;
 		}
 
 		const parsedAmount = parseFloat(amount.replace(',', '.'));
 		if (isNaN(parsedAmount) || parsedAmount <= 0) {
 			error = 'Please enter a valid amount';
+			isSubmitting = false;
 			return;
 		}
 
-		const parsedDate = new Date(date);
-		if (isNaN(parsedDate.getTime())) {
+		if (!date || isNaN(date.getTime())) {
 			error = 'Please enter a valid date';
+			isSubmitting = false;
 			return;
 		}
 
-		expenses.addTransaction({
-			owner,
-			description: description.trim(),
-			amount: parsedAmount,
-			type,
-			date: parsedDate
-		});
+		try {
+			// Make API call to write to Google Sheets
+			const response = await fetch('/api/transactions', {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					owner,
+					description: description.trim(),
+					amount: parsedAmount,
+					type,
+					date: date.toISOString()
+				})
+			});
 
-		// Reset form and show success
-		description = '';
-		amount = '';
-		date = formatDateForInput(new Date());
-		success = true;
+			const result = await response.json();
 
-		// Hide success message after 3 seconds
-		setTimeout(() => {
-			success = false;
-		}, 3000);
+			if (!response.ok) {
+				throw new Error(result.error || 'Failed to save transaction');
+			}
+
+			// Only update local store AFTER successful API response
+			expenses.addTransaction({
+				owner,
+				description: description.trim(),
+				amount: parsedAmount,
+				type,
+				date: date
+			});
+
+			// Reset form and show success
+			description = '';
+			amount = '';
+			date = new Date();
+			success = true;
+
+			// Hide success message after 3 seconds
+			setTimeout(() => {
+				success = false;
+			}, 3000);
+		} catch (err) {
+			error = err instanceof Error ? err.message : 'Failed to save transaction. Please try again.';
+		} finally {
+			isSubmitting = false;
+		}
 	}
 </script>
 
@@ -107,7 +138,8 @@
 					<button
 						type="button"
 						onclick={() => (owner = o)}
-						class="flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all {owner === o
+						disabled={isSubmitting}
+						class="flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed {owner === o
 							? 'border-primary bg-primary/5'
 							: 'border-themed hover:border-themed-tertiary bg-themed'}"
 					>
@@ -143,20 +175,28 @@
 			required
 		/>
 
-		<Input
-			type="date"
+		<DatePicker
 			label="Date"
 			bind:value={date}
+			disabled={isSubmitting}
 			required
 		/>
 
 		<div class="pt-2">
-			<Button type="submit" fullWidth>
-				<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<line x1="12" y1="5" x2="12" y2="19"/>
-					<line x1="5" y1="12" x2="19" y2="12"/>
-				</svg>
-				Add Transaction
+			<Button type="submit" fullWidth disabled={isSubmitting}>
+				{#if isSubmitting}
+					<svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+						<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+					</svg>
+					Saving...
+				{:else}
+					<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<line x1="12" y1="5" x2="12" y2="19"/>
+						<line x1="5" y1="12" x2="19" y2="12"/>
+					</svg>
+					Add Transaction
+				{/if}
 			</Button>
 		</div>
 	</form>

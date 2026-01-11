@@ -1,5 +1,5 @@
 import type { Transaction, Owner, ExpenseType } from '$lib/types';
-import { parseBRL, parseDateBR } from './format';
+import { parseBRL, parseDateBR, formatBRL } from './format';
 
 // Portuguese to English type mapping
 const TYPE_MAP: Record<string, ExpenseType> = {
@@ -145,4 +145,41 @@ export function parseSheetData(rows: string[][]): ParseResult {
 	}
 
 	return { transactions, errors, skipped };
+}
+
+// English to Portuguese type mapping (reverse of TYPE_MAP)
+const REVERSE_TYPE_MAP: Record<ExpenseType, string> = {
+	'Income': 'Renda',
+	'Household': 'Despesa Familiar',
+	'Split 50/50': 'Despesa 50/50',
+	'Personal': 'Despesa Pessoal',
+	'Paid for Partner': 'Pagou para o outro',
+	'Credit': 'Credito',
+	'Settlement': 'Quitacao'
+};
+
+/**
+ * Formats a date as YYYY-MM-DD for Google Sheets
+ * Uses ISO format which is unambiguous regardless of spreadsheet locale
+ * Google Sheets will then display it according to the cell/sheet format settings
+ */
+function formatDateForSheet(date: Date): string {
+	const day = date.getUTCDate().toString().padStart(2, '0');
+	const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
+	const year = date.getUTCFullYear();
+	return `${year}-${month}-${day}`;
+}
+
+/**
+ * Converts a transaction to a row format for Google Sheets
+ * Returns: [Owner, Description, Amount, Type, Date]
+ */
+export function transactionToSheetRow(tx: Omit<Transaction, 'id'>): string[] {
+	return [
+		tx.owner,                          // Column A: Owner
+		tx.description,                    // Column B: Description
+		formatBRL(tx.amount),              // Column C: Amount (R$ X.XXX,XX)
+		REVERSE_TYPE_MAP[tx.type],         // Column D: Type (Portuguese)
+		formatDateForSheet(tx.date)        // Column E: Date (DD/MM/YY)
+	];
 }

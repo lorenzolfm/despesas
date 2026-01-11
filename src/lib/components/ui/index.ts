@@ -6,3 +6,4 @@ export { default as Input } from './Input.svelte';
 export { default as Select } from './Select.svelte';
 export { default as Modal } from './Modal.svelte';
 export { default as ThemeToggle } from './ThemeToggle.svelte';
+export { default as DatePicker } from './DatePicker.svelte';
