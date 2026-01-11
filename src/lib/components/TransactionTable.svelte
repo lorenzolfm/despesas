@@ -4,12 +4,37 @@
 	import { Card, Avatar, Badge, Button, Input, Modal } from '$lib/components/ui';
 	import type { ExpenseType, Transaction } from '$lib/types';
 
+	interface Props {
+		onDelete?: () => void;
+	}
+
+	let { onDelete }: Props = $props();
+
 	const expenses = useExpenses();
 
 	let searchInput = $state('');
-	let deleteModal = $state<{ open: boolean; transaction: Transaction | null }>({
+	let showFutureTransactions = $state(false);
+	let deleteModal = $state<{ open: boolean; transaction: Transaction | null; isDeleting: boolean; error: string }>({
 		open: false,
-		transaction: null
+		transaction: null,
+		isDeleting: false,
+		error: ''
+	});
+
+	// Get today's date at midnight for comparison
+	const today = new Date();
+	today.setHours(23, 59, 59, 999);
+
+	// Filter out future transactions unless toggle is on
+	const visibleTransactions = $derived(() => {
+		if (showFutureTransactions) {
+			return expenses.filteredTransactions;
+		}
+		return expenses.filteredTransactions.filter(tx => tx.date <= today);
+	});
+
+	const futureTransactionsCount = $derived(() => {
+		return expenses.filteredTransactions.filter(tx => tx.date > today).length;
 	});
 
 	function handleSearch() {
@@ -22,18 +47,47 @@
 	}
 
 	function openDeleteModal(tx: Transaction) {
-		deleteModal = { open: true, transaction: tx };
+		deleteModal = { open: true, transaction: tx, isDeleting: false, error: '' };
 	}
 
 	function closeDeleteModal() {
-		deleteModal = { open: false, transaction: null };
+		deleteModal = { open: false, transaction: null, isDeleting: false, error: '' };
 	}
 
-	function confirmDelete() {
-		if (deleteModal.transaction) {
-			expenses.removeTransaction(deleteModal.transaction.id);
+	async function confirmDelete() {
+		if (!deleteModal.transaction) return;
+
+		deleteModal.isDeleting = true;
+		deleteModal.error = '';
+
+		try {
+			const tx = deleteModal.transaction;
+			const response = await fetch('/api/transactions', {
+				method: 'DELETE',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					owner: tx.owner,
+					description: tx.description,
+					amount: tx.amount,
+					type: tx.type,
+					date: tx.date.toISOString()
+				})
+			});
+
+			const result = await response.json();
+
+			if (!response.ok) {
+				throw new Error(result.error || 'Failed to delete transaction');
+			}
+
+			closeDeleteModal();
+			onDelete?.();
+		} catch (err) {
+			deleteModal.error = err instanceof Error ? err.message : 'Failed to delete transaction';
+			deleteModal.isDeleting = false;
 		}
-		closeDeleteModal();
 	}
 
 	function getTypeBadgeVariant(type: ExpenseType): 'income' | 'rent' | 'utilities' | 'groceries' | 'transport' | 'health' | 'leisure' | 'other' | 'success' | 'warning' | 'danger' | 'default' {
@@ -59,7 +113,7 @@
 
 	// Group transactions by date
 	const groupedTransactions = $derived(() => {
-		const groups = groupTransactionsByDate(expenses.filteredTransactions);
+		const groups = groupTransactionsByDate(visibleTransactions());
 		return Array.from(groups.entries()).map(([dateStr, txs]) => ({
 			date: new Date(dateStr),
 			transactions: txs
@@ -94,14 +148,34 @@
 				</Button>
 			{/if}
 		</div>
-		<p class="text-sm text-themed-secondary mt-2">
-			{expenses.filteredTransactions.length} transaction{expenses.filteredTransactions.length !== 1 ? 's' : ''}
-			{expenses.searchQuery ? `matching "${expenses.searchQuery}"` : ''}
-		</p>
+		<div class="flex items-center justify-between mt-2">
+			<p class="text-sm text-themed-secondary">
+				{visibleTransactions().length} transaction{visibleTransactions().length !== 1 ? 's' : ''}
+				{expenses.searchQuery ? `matching "${expenses.searchQuery}"` : ''}
+			</p>
+			{#if futureTransactionsCount() > 0 || showFutureTransactions}
+				<label class="flex items-center gap-2 cursor-pointer">
+					<span class="text-sm text-themed-secondary">
+						Show future ({futureTransactionsCount()})
+					</span>
+					<button
+						type="button"
+						role="switch"
+						aria-checked={showFutureTransactions}
+						onclick={() => showFutureTransactions = !showFutureTransactions}
+						class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors {showFutureTransactions ? 'bg-primary' : 'bg-themed-tertiary'}"
+					>
+						<span
+							class="inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform {showFutureTransactions ? 'translate-x-4' : 'translate-x-0.5'}"
+						></span>
+					</button>
+				</label>
+			{/if}
+		</div>
 	</div>
 
 	<!-- Transaction List -->
-	{#if expenses.filteredTransactions.length === 0}
+	{#if visibleTransactions().length === 0}
 		<div class="p-12 text-center">
 			<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-themed-tertiary flex items-center justify-center">
 				<svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-themed-tertiary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -114,6 +188,9 @@
 			{#if expenses.transactions.length === 0}
 				<h3 class="text-lg font-medium text-themed mb-1">No transactions yet</h3>
 				<p class="text-themed-secondary">Add your first transaction above or import from CSV</p>
+			{:else if futureTransactionsCount() > 0 && !showFutureTransactions}
+				<h3 class="text-lg font-medium text-themed mb-1">No past transactions</h3>
+				<p class="text-themed-secondary">Toggle "Show future" to see upcoming transactions</p>
 			{:else}
 				<h3 class="text-lg font-medium text-themed mb-1">No results found</h3>
 				<p class="text-themed-secondary">Try adjusting your search</p>
@@ -187,12 +264,16 @@
 	title="Delete Transaction"
 	onclose={closeDeleteModal}
 	onconfirm={confirmDelete}
-	confirmText="Delete"
+	confirmText={deleteModal.isDeleting ? "Deleting..." : "Delete"}
 	confirmVariant="danger"
+	confirmDisabled={deleteModal.isDeleting}
 >
 	{#if deleteModal.transaction}
 		<p class="text-themed-secondary">
 			Are you sure you want to delete "{deleteModal.transaction.description}" ({formatBRL(deleteModal.transaction.amount)})?
 		</p>
+		{#if deleteModal.error}
+			<p class="mt-2 text-sm text-negative">{deleteModal.error}</p>
+		{/if}
 	{/if}
 </Modal>

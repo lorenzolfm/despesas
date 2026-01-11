@@ -174,3 +174,147 @@ export const POST: RequestHandler = async ({ request }) => {
 		);
 	}
 };
+
+export const DELETE: RequestHandler = async ({ request }) => {
+	try {
+		const { GOOGLE_SHEETS_ID, GOOGLE_SERVICE_ACCOUNT_EMAIL, GOOGLE_PRIVATE_KEY } = env;
+
+		// Validate environment variables
+		if (!GOOGLE_SHEETS_ID || !GOOGLE_SERVICE_ACCOUNT_EMAIL || !GOOGLE_PRIVATE_KEY) {
+			return json(
+				{ error: 'Google Sheets API not configured. Please set environment variables.' },
+				{ status: 500 }
+			);
+		}
+
+		// Parse request body
+		const body = await request.json();
+		const { owner, description, amount, type, date } = body;
+
+		// Validate required fields
+		if (!owner || !description || amount === undefined || !type || !date) {
+			return json(
+				{ error: 'Missing required fields: owner, description, amount, type, date' },
+				{ status: 400 }
+			);
+		}
+
+		// Create auth client with service account
+		const auth = new google.auth.GoogleAuth({
+			credentials: {
+				client_email: GOOGLE_SERVICE_ACCOUNT_EMAIL,
+				private_key: GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n')
+			},
+			scopes: ['https://www.googleapis.com/auth/spreadsheets']
+		});
+
+		const sheets = google.sheets({ version: 'v4', auth });
+
+		// Fetch all data to find the row to delete
+		const response = await sheets.spreadsheets.values.get({
+			spreadsheetId: GOOGLE_SHEETS_ID,
+			range: 'A:E'
+		});
+
+		const rows = response.data.values;
+		if (!rows || rows.length < 2) {
+			return json(
+				{ error: 'No transactions found to delete.' },
+				{ status: 404 }
+			);
+		}
+
+		// Parse the transaction date for comparison
+		const txDate = new Date(date);
+		const txDay = txDate.getUTCDate();
+		const txMonth = txDate.getUTCMonth() + 1;
+		const txYear = txDate.getUTCFullYear();
+
+		// Find the row index that matches (skip header row)
+		let rowIndexToDelete = -1;
+		for (let i = 1; i < rows.length; i++) {
+			const row = rows[i];
+			if (!row || row.length < 5) continue;
+
+			const [rowOwner, rowDesc, rowAmount, rowType, rowDate] = row;
+
+			// Check owner and description match
+			if (rowOwner !== owner || rowDesc !== description) continue;
+
+			// Check amount (parse the formatted amount)
+			const parsedAmount = parseFloat(
+				String(rowAmount)
+					.replace(/R\$\s*/g, '')
+					.replace(/\./g, '')
+					.replace(',', '.')
+			) || 0;
+			if (Math.abs(parsedAmount - amount) > 0.01) continue;
+
+			// Check date - parse various formats
+			let dateMatch = false;
+			const dateStr = String(rowDate);
+
+			// Try YYYY-MM-DD format
+			if (dateStr.includes('-')) {
+				const [y, m, d] = dateStr.split('-').map(Number);
+				dateMatch = d === txDay && m === txMonth && y === txYear;
+			}
+			// Try DD/MM/YY or DD/MM/YYYY format
+			else if (dateStr.includes('/')) {
+				const parts = dateStr.split('/').map(Number);
+				if (parts.length === 3) {
+					const [d, m, y] = parts;
+					const fullYear = y < 100 ? (y < 50 ? 2000 + y : 1900 + y) : y;
+					dateMatch = d === txDay && m === txMonth && fullYear === txYear;
+				}
+			}
+
+			if (!dateMatch) continue;
+
+			// Found a match
+			rowIndexToDelete = i;
+			break;
+		}
+
+		if (rowIndexToDelete === -1) {
+			return json(
+				{ error: 'Transaction not found in spreadsheet.' },
+				{ status: 404 }
+			);
+		}
+
+		// Get the sheet ID (first sheet)
+		const spreadsheet = await sheets.spreadsheets.get({
+			spreadsheetId: GOOGLE_SHEETS_ID
+		});
+		const sheetId = spreadsheet.data.sheets?.[0]?.properties?.sheetId ?? 0;
+
+		// Delete the row
+		await sheets.spreadsheets.batchUpdate({
+			spreadsheetId: GOOGLE_SHEETS_ID,
+			requestBody: {
+				requests: [{
+					deleteDimension: {
+						range: {
+							sheetId: sheetId,
+							dimension: 'ROWS',
+							startIndex: rowIndexToDelete,
+							endIndex: rowIndexToDelete + 1
+						}
+					}
+				}]
+			}
+		});
+
+		return json({ success: true });
+
+	} catch (error) {
+		console.error('Error deleting from Google Sheets:', error);
+
+		const message = error instanceof Error ? error.message : 'Unknown error';
+		return json(
+			{ error: `Failed to delete from Google Sheets: ${message}` },
+			{ status: 500 }
+		);
+	}
+};

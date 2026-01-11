@@ -4,6 +4,12 @@
 	import { useExpenses } from '$lib/stores/expenses.svelte';
 	import { Card, Button, Input, Select, Avatar, DatePicker } from '$lib/components/ui';
 
+	interface Props {
+		onSuccess?: () => void;
+	}
+
+	let { onSuccess }: Props = $props();
+
 	const expenses = useExpenses();
 
 	let owner = $state<Owner>('Lorenzo');
@@ -67,20 +73,14 @@
 				throw new Error(result.error || 'Failed to save transaction');
 			}
 
-			// Only update local store AFTER successful API response
-			expenses.addTransaction({
-				owner,
-				description: description.trim(),
-				amount: parsedAmount,
-				type,
-				date: date
-			});
-
 			// Reset form and show success
 			description = '';
 			amount = '';
 			date = new Date();
 			success = true;
+
+			// Refresh the transactions list from Google Sheets
+			onSuccess?.();
 
 			// Hide success message after 3 seconds
 			setTimeout(() => {

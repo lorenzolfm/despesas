@@ -110,10 +110,10 @@
 					<BalanceHero monthlyTotals={expenses.monthlyTotals} />
 
 					<!-- Add Transaction Section -->
-					<ExpenseForm />
+					<ExpenseForm onSuccess={fetchTransactions} />
 
 					<!-- Transactions List -->
-					<TransactionTable />
+					<TransactionTable onDelete={fetchTransactions} />
 				</div>
 			{:else if activeTab === 'summary'}
 				<div class="space-y-6 animate-fade-in">

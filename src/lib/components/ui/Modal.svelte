@@ -10,6 +10,7 @@
     confirmText?: string;
     cancelText?: string;
     confirmVariant?: 'primary' | 'danger' | 'success';
+    confirmDisabled?: boolean;
     children: Snippet;
   }
 
@@ -21,6 +22,7 @@
     confirmText = 'Confirm',
     cancelText = 'Cancel',
     confirmVariant = 'primary',
+    confirmDisabled = false,
     children
   }: Props = $props();
 
@@ -69,7 +71,7 @@
           {cancelText}
         </Button>
         {#if onconfirm}
-          <Button variant={confirmVariant} onclick={onconfirm}>
+          <Button variant={confirmVariant} onclick={onconfirm} disabled={confirmDisabled}>
             {confirmText}
           </Button>
         {/if}
