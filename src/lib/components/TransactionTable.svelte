@@ -1,14 +1,16 @@
 <script lang="ts">
 	import { useExpenses } from '$lib/stores/expenses.svelte';
 	import { formatBRL, formatRelativeDate, groupTransactionsByDate } from '$lib/utils/format';
-	import { Card, Avatar, Badge, Button, Input, Modal } from '$lib/components/ui';
-	import type { ExpenseType, Transaction } from '$lib/types';
+	import { Card, Avatar, Badge, Button, Input, Modal, Select, DatePicker } from '$lib/components/ui';
+	import type { ExpenseType, Transaction, Owner } from '$lib/types';
+	import { EXPENSE_TYPES, OWNERS } from '$lib/types';
 
 	interface Props {
 		onDelete?: () => void;
+		onUpdate?: () => void;
 	}
 
-	let { onDelete }: Props = $props();
+	let { onDelete, onUpdate }: Props = $props();
 
 	const expenses = useExpenses();
 
@@ -20,6 +22,31 @@
 		isDeleting: false,
 		error: ''
 	});
+
+	let editModal = $state<{
+		open: boolean;
+		originalTransaction: Transaction | null;
+		isUpdating: boolean;
+		error: string;
+		// Form fields
+		owner: Owner;
+		description: string;
+		amount: string;
+		type: ExpenseType;
+		date: Date;
+	}>({
+		open: false,
+		originalTransaction: null,
+		isUpdating: false,
+		error: '',
+		owner: 'Lorenzo',
+		description: '',
+		amount: '',
+		type: 'Household',
+		date: new Date()
+	});
+
+	const typeOptions = EXPENSE_TYPES.map((t) => ({ value: t, label: t }));
 
 	// Get today's date at midnight for comparison
 	const today = new Date();
@@ -87,6 +114,96 @@
 		} catch (err) {
 			deleteModal.error = err instanceof Error ? err.message : 'Failed to delete transaction';
 			deleteModal.isDeleting = false;
+		}
+	}
+
+	function openEditModal(tx: Transaction) {
+		editModal = {
+			open: true,
+			originalTransaction: tx,
+			isUpdating: false,
+			error: '',
+			owner: tx.owner,
+			description: tx.description,
+			amount: tx.amount.toString().replace('.', ','),
+			type: tx.type,
+			date: new Date(tx.date)
+		};
+	}
+
+	function closeEditModal() {
+		editModal = {
+			open: false,
+			originalTransaction: null,
+			isUpdating: false,
+			error: '',
+			owner: 'Lorenzo',
+			description: '',
+			amount: '',
+			type: 'Household',
+			date: new Date()
+		};
+	}
+
+	async function confirmEdit() {
+		if (!editModal.originalTransaction) return;
+
+		// Validation
+		if (!editModal.description.trim()) {
+			editModal.error = 'Description is required';
+			return;
+		}
+
+		const parsedAmount = parseFloat(editModal.amount.replace(',', '.'));
+		if (isNaN(parsedAmount) || parsedAmount <= 0) {
+			editModal.error = 'Please enter a valid amount';
+			return;
+		}
+
+		if (!editModal.date || isNaN(editModal.date.getTime())) {
+			editModal.error = 'Please enter a valid date';
+			return;
+		}
+
+		editModal.isUpdating = true;
+		editModal.error = '';
+
+		try {
+			const original = editModal.originalTransaction;
+			const response = await fetch('/api/transactions', {
+				method: 'PUT',
+				headers: {
+					'Content-Type': 'application/json'
+				},
+				body: JSON.stringify({
+					original: {
+						owner: original.owner,
+						description: original.description,
+						amount: original.amount,
+						type: original.type,
+						date: original.date.toISOString()
+					},
+					updated: {
+						owner: editModal.owner,
+						description: editModal.description.trim(),
+						amount: parsedAmount,
+						type: editModal.type,
+						date: editModal.date.toISOString()
+					}
+				})
+			});
+
+			const result = await response.json();
+
+			if (!response.ok) {
+				throw new Error(result.error || 'Failed to update transaction');
+			}
+
+			closeEditModal();
+			onUpdate?.();
+		} catch (err) {
+			editModal.error = err instanceof Error ? err.message : 'Failed to update transaction';
+			editModal.isUpdating = false;
 		}
 	}
 
@@ -239,17 +356,29 @@
 								</span>
 							</div>
 
-							<!-- Delete Button -->
-							<button
-								onclick={() => openDeleteModal(tx)}
-								class="p-2 rounded-lg text-themed-tertiary hover:text-negative hover:bg-negative/10 opacity-0 group-hover:opacity-100 transition-all"
-								aria-label="Delete transaction"
-							>
-								<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-									<polyline points="3 6 5 6 21 6"/>
-									<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-								</svg>
-							</button>
+							<!-- Action Buttons -->
+							<div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+								<button
+									onclick={() => openEditModal(tx)}
+									class="p-2 rounded-lg text-themed-tertiary hover:text-primary hover:bg-primary/10"
+									aria-label="Edit transaction"
+								>
+									<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+										<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+									</svg>
+								</button>
+								<button
+									onclick={() => openDeleteModal(tx)}
+									class="p-2 rounded-lg text-themed-tertiary hover:text-negative hover:bg-negative/10"
+									aria-label="Delete transaction"
+								>
+									<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+										<polyline points="3 6 5 6 21 6"/>
+										<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+									</svg>
+								</button>
+							</div>
 						</div>
 					</div>
 				{/each}
@@ -276,4 +405,71 @@
 			<p class="mt-2 text-sm text-negative">{deleteModal.error}</p>
 		{/if}
 	{/if}
+</Modal>
+
+<!-- Edit Transaction Modal -->
+<Modal
+	bind:open={editModal.open}
+	title="Edit Transaction"
+	onclose={closeEditModal}
+	onconfirm={confirmEdit}
+	confirmText={editModal.isUpdating ? "Saving..." : "Save"}
+	confirmVariant="primary"
+	confirmDisabled={editModal.isUpdating}
+>
+	<div class="space-y-4">
+		{#if editModal.error}
+			<div class="p-3 rounded-lg bg-negative/10 border border-negative/20">
+				<p class="text-sm text-negative">{editModal.error}</p>
+			</div>
+		{/if}
+
+		<!-- Owner Selection -->
+		<fieldset>
+			<legend class="block text-sm font-medium text-themed-secondary mb-2">Who paid?</legend>
+			<div class="flex gap-2">
+				{#each OWNERS as o}
+					<button
+						type="button"
+						onclick={() => editModal.owner = o}
+						disabled={editModal.isUpdating}
+						class="flex-1 py-2 px-3 rounded-lg border-2 text-sm font-medium transition-all disabled:opacity-50 {editModal.owner === o
+							? 'border-primary bg-primary/5 text-primary'
+							: 'border-themed text-themed hover:border-themed-tertiary'}"
+					>
+						{o}
+					</button>
+				{/each}
+			</div>
+		</fieldset>
+
+		<Select
+			label="Type"
+			bind:value={editModal.type}
+			options={typeOptions}
+			disabled={editModal.isUpdating}
+		/>
+
+		<Input
+			type="text"
+			label="Amount (R$)"
+			bind:value={editModal.amount}
+			placeholder="0,00"
+			disabled={editModal.isUpdating}
+		/>
+
+		<Input
+			type="text"
+			label="Description"
+			bind:value={editModal.description}
+			placeholder="What was this expense for?"
+			disabled={editModal.isUpdating}
+		/>
+
+		<DatePicker
+			label="Date"
+			bind:value={editModal.date}
+			disabled={editModal.isUpdating}
+		/>
+	</div>
 </Modal>

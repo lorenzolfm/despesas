@@ -113,7 +113,7 @@
 					<ExpenseForm onSuccess={fetchTransactions} />
 
 					<!-- Transactions List -->
-					<TransactionTable onDelete={fetchTransactions} />
+					<TransactionTable onDelete={fetchTransactions} onUpdate={fetchTransactions} />
 				</div>
 			{:else if activeTab === 'summary'}
 				<div class="space-y-6 animate-fade-in">
