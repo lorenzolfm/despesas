@@ -54,7 +54,21 @@
 		totalPaidForPartner: monthlyTotalsUpToCurrent.reduce((sum, m) => sum + m.totalPaidForPartner, 0),
 		totalHousehold: monthlyTotalsUpToCurrent.reduce((sum, m) => sum + m.totalHousehold, 0),
 		totalPersonal: monthlyTotalsUpToCurrent.reduce((sum, m) => sum + m.totalPersonal, 0),
-		grandTotal: monthlyTotalsUpToCurrent.reduce((sum, m) => sum + m.grandTotal, 0)
+		grandTotal: monthlyTotalsUpToCurrent.reduce((sum, m) => sum + m.grandTotal, 0),
+		lorenzoIncome: monthlyTotalsUpToCurrent.reduce((sum, m) => sum + m.lorenzo.income, 0),
+		mariaIncome: monthlyTotalsUpToCurrent.reduce((sum, m) => sum + m.maria.income, 0)
+	});
+
+	// Calculate aggregated share percentages
+	const aggregatedShares = $derived(() => {
+		const totalIncome = aggregatedTotals.lorenzoIncome + aggregatedTotals.mariaIncome;
+		if (totalIncome === 0) {
+			return { lorenzo: 50, maria: 50 };
+		}
+		return {
+			lorenzo: Math.round((aggregatedTotals.lorenzoIncome / totalIncome) * 100),
+			maria: Math.round((aggregatedTotals.mariaIncome / totalIncome) * 100)
+		};
 	});
 
 	// Expense categories for breakdown
@@ -101,6 +115,29 @@
 				</div>
 			{/each}
 		</div>
+
+		<!-- Aggregated Income Shares -->
+		{#if aggregatedTotals.totalIncome > 0}
+			<div class="mt-6 pt-6 border-t border-themed">
+				<p class="text-sm text-themed-secondary mb-3">Income Share (all months)</p>
+				<div class="grid grid-cols-2 gap-4">
+					<div class="flex items-center gap-3 p-3 rounded-lg bg-lorenzo/10">
+						<Avatar name="Lorenzo" size="sm" color="lorenzo" />
+						<div>
+							<p class="text-sm font-medium text-themed">Lorenzo</p>
+							<p class="text-lg font-bold text-lorenzo">{aggregatedShares().lorenzo}%</p>
+						</div>
+					</div>
+					<div class="flex items-center gap-3 p-3 rounded-lg bg-maria/10">
+						<Avatar name="Maria" size="sm" color="maria" />
+						<div>
+							<p class="text-sm font-medium text-themed">Maria</p>
+							<p class="text-lg font-bold text-maria">{aggregatedShares().maria}%</p>
+						</div>
+					</div>
+				</div>
+			</div>
+		{/if}
 	</Card>
 
 	{#if allMonthlyTotals.length === 0}
@@ -182,7 +219,7 @@
 							<div>
 								<h4 class="font-semibold text-themed">Lorenzo</h4>
 								<p class="text-sm text-themed-secondary">
-									{Math.round(month.lorenzo.sharePercent)}% share
+									{Math.round(month.lorenzo.sharePercent * 100)}% share
 								</p>
 							</div>
 						</div>
@@ -217,7 +254,7 @@
 							<div>
 								<h4 class="font-semibold text-themed">Maria</h4>
 								<p class="text-sm text-themed-secondary">
-									{Math.round(month.maria.sharePercent)}% share
+									{Math.round(month.maria.sharePercent * 100)}% share
 								</p>
 							</div>
 						</div>

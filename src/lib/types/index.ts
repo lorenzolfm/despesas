@@ -50,6 +50,7 @@ export interface PersonMonthlyTotals {
 	settlement: number;
 	total: number;
 	debt: number; // Positive = owes partner, Negative = partner owes them
+	realSpending: number; // What they actually spend after reimbursements
 }
 
 export interface CombinedMonthlyTotals {

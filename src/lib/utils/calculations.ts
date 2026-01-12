@@ -108,6 +108,10 @@ export function calculatePersonMonthlyTotals(
 	// Total expenses (all types except Income and Credit)
 	const total = split5050Paid + householdPaid + paidForPartner + personal;
 
+	// Real spending = what you actually spend after reimbursements
+	// This is your portion of shared expenses + personal + what partner paid for you
+	const realSpending = personal + split5050Portion + householdPortion + partnerPaidForMe;
+
 	return {
 		owner,
 		monthKey,
@@ -122,7 +126,8 @@ export function calculatePersonMonthlyTotals(
 		personal,
 		settlement,
 		total,
-		debt
+		debt,
+		realSpending
 	};
 }
 

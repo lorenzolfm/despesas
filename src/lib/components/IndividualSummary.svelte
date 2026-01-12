@@ -64,11 +64,13 @@
 	);
 
 	// Calculate aggregated totals across all months up to current
-	const aggregatedTotals = $derived({
-		income: personTotalsUpToCurrent.reduce((sum, p) => sum + p.income, 0),
-		credit: personTotalsUpToCurrent.reduce((sum, p) => sum + p.credit, 0),
-		total: personTotalsUpToCurrent.reduce((sum, p) => sum + p.total, 0),
-		debt: personTotalsUpToCurrent.reduce((sum, p) => sum + p.debt, 0)
+	const aggregatedTotals = $derived.by(() => {
+		const income = personTotalsUpToCurrent.reduce((sum, p) => sum + p.income, 0);
+		const credit = personTotalsUpToCurrent.reduce((sum, p) => sum + p.credit, 0);
+		const total = personTotalsUpToCurrent.reduce((sum, p) => sum + p.total, 0);
+		const debt = personTotalsUpToCurrent.reduce((sum, p) => sum + p.debt, 0);
+		const realSpending = personTotalsUpToCurrent.reduce((sum, p) => sum + p.realSpending, 0);
+		return { income, credit, total, debt, realSpending };
 	});
 </script>
 
@@ -92,7 +94,7 @@
 		</div>
 
 		<!-- Aggregated Stats Grid -->
-		<div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+		<div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
 			<div class="p-4 rounded-lg bg-positive/10">
 				<p class="text-xs font-medium text-themed-secondary mb-1">Total Income</p>
 				<p class="text-lg font-bold font-mono text-positive">{formatBRL(aggregatedTotals.income)}</p>
@@ -104,6 +106,10 @@
 			<div class="p-4 rounded-lg bg-themed-tertiary">
 				<p class="text-xs font-medium text-themed-secondary mb-1">Total Paid</p>
 				<p class="text-lg font-bold font-mono text-themed">{formatBRL(aggregatedTotals.total)}</p>
+			</div>
+			<div class="p-4 rounded-lg bg-warning/10">
+				<p class="text-xs font-medium text-themed-secondary mb-1">Real Spending</p>
+				<p class="text-lg font-bold font-mono text-warning">{formatBRL(aggregatedTotals.realSpending)}</p>
 			</div>
 			<div class="p-4 rounded-lg {aggregatedTotals.debt > 0 ? 'bg-negative/10' : aggregatedTotals.debt < 0 ? 'bg-positive/10' : 'bg-themed-tertiary'}">
 				<p class="text-xs font-medium text-themed-secondary mb-1">Balance</p>
@@ -167,7 +173,7 @@
 				</div>
 
 				<!-- Summary Stats -->
-				<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+				<div class="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
 					<div class="p-4 rounded-lg bg-positive/10">
 						<p class="text-xs font-medium text-themed-secondary mb-1">Income</p>
 						<p class="text-lg font-bold font-mono text-positive">{formatBRL(person.income)}</p>
@@ -179,6 +185,10 @@
 					<div class="p-4 rounded-lg bg-themed-tertiary">
 						<p class="text-xs font-medium text-themed-secondary mb-1">Total Paid</p>
 						<p class="text-lg font-bold font-mono text-themed">{formatBRL(person.total)}</p>
+					</div>
+					<div class="p-4 rounded-lg bg-warning/10">
+						<p class="text-xs font-medium text-themed-secondary mb-1">Real Spending</p>
+						<p class="text-lg font-bold font-mono text-warning">{formatBRL(person.realSpending)}</p>
 					</div>
 					<div class="p-4 rounded-lg {person.debt > 0 ? 'bg-negative/10' : person.debt < 0 ? 'bg-positive/10' : 'bg-themed-tertiary'}">
 						<p class="text-xs font-medium text-themed-secondary mb-1">Balance</p>

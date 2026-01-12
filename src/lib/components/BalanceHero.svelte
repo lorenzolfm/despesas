@@ -70,21 +70,4 @@
     {/if}
   </div>
 
-  <!-- Quick stats -->
-  {#if monthlyTotals.length > 0}
-    <div class="mt-6 pt-6 border-t border-themed grid grid-cols-2 gap-4">
-      <div class="text-center">
-        <p class="text-sm text-themed-secondary mb-1">Lorenzo's Share</p>
-        <p class="text-lg font-semibold text-lorenzo">
-          {monthlyTotals.length > 0 ? Math.round(monthlyTotals[0].lorenzo.sharePercent) : 50}%
-        </p>
-      </div>
-      <div class="text-center">
-        <p class="text-sm text-themed-secondary mb-1">Maria's Share</p>
-        <p class="text-lg font-semibold text-maria">
-          {monthlyTotals.length > 0 ? Math.round(monthlyTotals[0].maria.sharePercent) : 50}%
-        </p>
-      </div>
-    </div>
-  {/if}
 </Card>

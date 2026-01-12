@@ -1,5 +1,5 @@
 import type { Transaction, Owner, ExpenseType } from '$lib/types';
-import { parseBRL, parseDateBR, formatBRL } from './format';
+import { parseBRL, parseDateBR } from './format';
 
 // Portuguese to English type mapping
 const TYPE_MAP: Record<string, ExpenseType> = {
@@ -174,12 +174,12 @@ function formatDateForSheet(date: Date): string {
  * Converts a transaction to a row format for Google Sheets
  * Returns: [Owner, Description, Amount, Type, Date]
  */
-export function transactionToSheetRow(tx: Omit<Transaction, 'id'>): string[] {
+export function transactionToSheetRow(tx: Omit<Transaction, 'id'>): (string | number)[] {
 	return [
 		tx.owner,                          // Column A: Owner
 		tx.description,                    // Column B: Description
-		formatBRL(tx.amount),              // Column C: Amount (R$ X.XXX,XX)
+		tx.amount,                         // Column C: Amount (raw number for Sheets)
 		REVERSE_TYPE_MAP[tx.type],         // Column D: Type (Portuguese)
-		formatDateForSheet(tx.date)        // Column E: Date (DD/MM/YY)
+		formatDateForSheet(tx.date)        // Column E: Date (YYYY-MM-DD)
 	];
 }
