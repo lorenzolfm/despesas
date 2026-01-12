@@ -70,7 +70,12 @@
 		const total = personTotalsUpToCurrent.reduce((sum, p) => sum + p.total, 0);
 		const debt = personTotalsUpToCurrent.reduce((sum, p) => sum + p.debt, 0);
 		const realSpending = personTotalsUpToCurrent.reduce((sum, p) => sum + p.realSpending, 0);
-		return { income, credit, total, debt, realSpending };
+		const split5050Paid = personTotalsUpToCurrent.reduce((sum, p) => sum + p.split5050Paid, 0);
+		const householdPaid = personTotalsUpToCurrent.reduce((sum, p) => sum + p.householdPaid, 0);
+		const paidForPartner = personTotalsUpToCurrent.reduce((sum, p) => sum + p.paidForPartner, 0);
+		const personal = personTotalsUpToCurrent.reduce((sum, p) => sum + p.personal, 0);
+		const settlement = personTotalsUpToCurrent.reduce((sum, p) => sum + p.settlement, 0);
+		return { income, credit, total, debt, realSpending, split5050Paid, householdPaid, paidForPartner, personal, settlement };
 	});
 </script>
 
@@ -116,6 +121,62 @@
 				<p class="text-lg font-bold font-mono {aggregatedTotals.debt > 0 ? 'text-negative' : aggregatedTotals.debt < 0 ? 'text-positive' : 'text-themed'}">
 					{aggregatedTotals.debt > 0 ? '-' : aggregatedTotals.debt < 0 ? '+' : ''}{formatBRL(Math.abs(aggregatedTotals.debt))}
 				</p>
+			</div>
+		</div>
+
+		<!-- All-Time Expense Categories -->
+		<div class="mt-6 pt-6 border-t border-themed">
+			<h4 class="text-sm font-semibold text-themed-secondary uppercase tracking-wide mb-4">All-Time by Category</h4>
+			<div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
+				<div class="p-3 rounded-lg border border-themed">
+					<div class="flex items-center gap-2 mb-2">
+						<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<circle cx="12" cy="12" r="10"/>
+							<line x1="8" y1="12" x2="16" y2="12"/>
+						</svg>
+						<p class="text-xs font-medium text-themed-secondary">50/50</p>
+					</div>
+					<p class="text-base font-bold font-mono text-themed">{formatBRL(aggregatedTotals.split5050Paid)}</p>
+				</div>
+				<div class="p-3 rounded-lg border border-themed">
+					<div class="flex items-center gap-2 mb-2">
+						<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-utilities" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+							<polyline points="9 22 9 12 15 12 15 22"/>
+						</svg>
+						<p class="text-xs font-medium text-themed-secondary">Household</p>
+					</div>
+					<p class="text-base font-bold font-mono text-themed">{formatBRL(aggregatedTotals.householdPaid)}</p>
+				</div>
+				<div class="p-3 rounded-lg border border-themed">
+					<div class="flex items-center gap-2 mb-2">
+						<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-maria" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+						</svg>
+						<p class="text-xs font-medium text-themed-secondary">Paid for {partnerName}</p>
+					</div>
+					<p class="text-base font-bold font-mono text-themed">{formatBRL(aggregatedTotals.paidForPartner)}</p>
+				</div>
+				<div class="p-3 rounded-lg border border-themed">
+					<div class="flex items-center gap-2 mb-2">
+						<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-themed-secondary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+							<circle cx="12" cy="7" r="4"/>
+						</svg>
+						<p class="text-xs font-medium text-themed-secondary">Personal</p>
+					</div>
+					<p class="text-base font-bold font-mono text-themed">{formatBRL(aggregatedTotals.personal)}</p>
+				</div>
+				<div class="p-3 rounded-lg border border-themed">
+					<div class="flex items-center gap-2 mb-2">
+						<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-rent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<line x1="12" y1="1" x2="12" y2="23"/>
+							<path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+						</svg>
+						<p class="text-xs font-medium text-themed-secondary">Settlement</p>
+					</div>
+					<p class="text-base font-bold font-mono text-rent">{formatBRL(aggregatedTotals.settlement)}</p>
+				</div>
 			</div>
 		</div>
 	</Card>
