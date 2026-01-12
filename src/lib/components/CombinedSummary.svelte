@@ -2,7 +2,7 @@
 	import type { MonthKey } from '$lib/types';
 	import { useExpenses } from '$lib/stores/expenses.svelte';
 	import { formatBRL, formatMonthYear, getMonthRange, formatDate, getMonthKey } from '$lib/utils/format';
-	import { Card, Avatar, Badge, Select } from '$lib/components/ui';
+	import { Card, Avatar, Badge, Select, LineChart } from '$lib/components/ui';
 
 	const expenses = useExpenses();
 
@@ -73,13 +73,30 @@
 
 	// Expense categories for breakdown
 	const categories = [
-		{ key: 'totalIncome', label: 'Income', color: 'text-positive', bgColor: 'bg-positive/10' },
-		{ key: 'totalCredit', label: 'Credit', color: 'text-info', bgColor: 'bg-info/10' },
-		{ key: 'totalSplit5050', label: 'Split 50/50', color: 'text-warning', bgColor: 'bg-warning/10' },
-		{ key: 'totalPaidForPartner', label: 'Paid for Partner', color: 'text-maria', bgColor: 'bg-maria/10' },
-		{ key: 'totalHousehold', label: 'Household', color: 'text-utilities', bgColor: 'bg-utilities/10' },
-		{ key: 'totalPersonal', label: 'Personal', color: 'text-themed-secondary', bgColor: 'bg-themed-tertiary' }
+		{ key: 'totalIncome', label: 'Income', color: 'text-positive', bgColor: 'bg-positive/10', chartColor: '#22c55e' },
+		{ key: 'totalCredit', label: 'Credit', color: 'text-info', bgColor: 'bg-info/10', chartColor: '#3b82f6' },
+		{ key: 'totalSplit5050', label: 'Split 50/50', color: 'text-warning', bgColor: 'bg-warning/10', chartColor: '#f59e0b' },
+		{ key: 'totalPaidForPartner', label: 'Paid for Partner', color: 'text-maria', bgColor: 'bg-maria/10', chartColor: '#ec4899' },
+		{ key: 'totalHousehold', label: 'Household', color: 'text-utilities', bgColor: 'bg-utilities/10', chartColor: '#8b5cf6' },
+		{ key: 'totalPersonal', label: 'Personal', color: 'text-themed-secondary', bgColor: 'bg-themed-tertiary', chartColor: '#6b7280' }
 	] as const;
+
+	// Selected category for chart (default to Income)
+	let selectedChartCategory = $state<(typeof categories)[number]['key']>('totalIncome');
+
+	// Get selected category info
+	const selectedCategory = $derived(
+		categories.find((c) => c.key === selectedChartCategory) || categories[0]
+	);
+
+	// Chart data - months sorted oldest to newest
+	const chartData = $derived.by(() => {
+		const sorted = [...monthlyTotalsUpToCurrent].sort((a, b) => compareMonthKeys(a.monthKey, b.monthKey));
+		return {
+			labels: sorted.map((m) => formatMonthYear(m.monthKey)),
+			data: sorted.map((m) => m[selectedChartCategory])
+		};
+	});
 </script>
 
 <div class="space-y-6">
@@ -103,18 +120,40 @@
 			</div>
 		</div>
 
-		<!-- Aggregated Category Breakdown -->
+		<!-- Aggregated Category Breakdown (Clickable) -->
 		<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
 			{#each categories as cat}
 				{@const value = aggregatedTotals[cat.key]}
-				<div class="p-3 rounded-lg {cat.bgColor}">
+				{@const isSelected = selectedChartCategory === cat.key}
+				<button
+					type="button"
+					onclick={() => selectedChartCategory = cat.key}
+					class="p-3 rounded-lg {cat.bgColor} text-left transition-all {isSelected ? 'ring-2 ring-offset-2 ring-offset-themed' : 'hover:opacity-80'}"
+					style={isSelected ? `--tw-ring-color: ${cat.chartColor}` : ''}
+				>
 					<p class="text-xs font-medium text-themed-secondary mb-1">{cat.label}</p>
 					<p class="text-sm font-semibold font-mono {cat.color}">
 						{formatBRL(value)}
 					</p>
-				</div>
+				</button>
 			{/each}
 		</div>
+
+		<!-- Chart -->
+		{#if chartData.labels.length > 0}
+			<div class="mt-6 pt-6 border-t border-themed">
+				<h4 class="text-sm font-semibold text-themed-secondary uppercase tracking-wide mb-4">
+					{selectedCategory.label} Evolution
+				</h4>
+				<LineChart
+					labels={chartData.labels}
+					data={chartData.data}
+					label={selectedCategory.label}
+					color={selectedCategory.chartColor}
+					height={250}
+				/>
+			</div>
+		{/if}
 
 		<!-- Aggregated Income Shares -->
 		{#if aggregatedTotals.totalIncome > 0}

@@ -7,3 +7,4 @@ export { default as Select } from './Select.svelte';
 export { default as Modal } from './Modal.svelte';
 export { default as ThemeToggle } from './ThemeToggle.svelte';
 export { default as DatePicker } from './DatePicker.svelte';
+export { default as LineChart } from './LineChart.svelte';

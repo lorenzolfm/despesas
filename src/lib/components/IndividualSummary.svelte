@@ -2,7 +2,7 @@
 	import type { Owner, MonthKey } from '$lib/types';
 	import { useExpenses } from '$lib/stores/expenses.svelte';
 	import { formatBRL, formatMonthYear, formatPercent, getMonthRange, formatDate, getMonthKey } from '$lib/utils/format';
-	import { Card, Avatar, Badge, Select } from '$lib/components/ui';
+	import { Card, Avatar, Badge, Select, LineChart } from '$lib/components/ui';
 
 	interface Props {
 		owner: Owner;
@@ -77,6 +77,38 @@
 		const settlement = personTotalsUpToCurrent.reduce((sum, p) => sum + p.settlement, 0);
 		return { income, credit, total, debt, realSpending, split5050Paid, householdPaid, paidForPartner, personal, settlement };
 	});
+
+	// Categories for chart selection
+	type CategoryKey = 'income' | 'credit' | 'total' | 'realSpending' | 'split5050Paid' | 'householdPaid' | 'paidForPartner' | 'personal' | 'settlement';
+
+	const chartCategories: { key: CategoryKey; label: string; chartColor: string }[] = [
+		{ key: 'income', label: 'Income', chartColor: '#22c55e' },
+		{ key: 'credit', label: 'Credit', chartColor: '#3b82f6' },
+		{ key: 'total', label: 'Total Paid', chartColor: '#6b7280' },
+		{ key: 'realSpending', label: 'Real Spending', chartColor: '#f59e0b' },
+		{ key: 'split5050Paid', label: '50/50', chartColor: '#f59e0b' },
+		{ key: 'householdPaid', label: 'Household', chartColor: '#8b5cf6' },
+		{ key: 'paidForPartner', label: 'Paid for Partner', chartColor: '#ec4899' },
+		{ key: 'personal', label: 'Personal', chartColor: '#6b7280' },
+		{ key: 'settlement', label: 'Settlement', chartColor: '#ef4444' }
+	];
+
+	// Selected category for chart (default to Income)
+	let selectedChartCategory = $state<CategoryKey>('income');
+
+	// Get selected category info
+	const selectedCategory = $derived(
+		chartCategories.find((c) => c.key === selectedChartCategory) || chartCategories[0]
+	);
+
+	// Chart data - months sorted oldest to newest
+	const chartData = $derived.by(() => {
+		const sorted = [...personTotalsUpToCurrent].sort((a, b) => compareMonthKeys(a.monthKey, b.monthKey));
+		return {
+			labels: sorted.map((m) => formatMonthYear(m.monthKey)),
+			data: sorted.map((m) => m[selectedChartCategory])
+		};
+	});
 </script>
 
 <div class="space-y-6">
@@ -98,24 +130,40 @@
 			{/if}
 		</div>
 
-		<!-- Aggregated Stats Grid -->
+		<!-- Aggregated Stats Grid (Clickable) -->
 		<div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
-			<div class="p-4 rounded-lg bg-positive/10">
+			<button
+				type="button"
+				onclick={() => selectedChartCategory = 'income'}
+				class="p-4 rounded-lg bg-positive/10 text-left transition-all {selectedChartCategory === 'income' ? 'ring-2 ring-offset-2 ring-offset-themed ring-[#22c55e]' : 'hover:opacity-80'}"
+			>
 				<p class="text-xs font-medium text-themed-secondary mb-1">Total Income</p>
 				<p class="text-lg font-bold font-mono text-positive">{formatBRL(aggregatedTotals.income)}</p>
-			</div>
-			<div class="p-4 rounded-lg bg-info/10">
+			</button>
+			<button
+				type="button"
+				onclick={() => selectedChartCategory = 'credit'}
+				class="p-4 rounded-lg bg-info/10 text-left transition-all {selectedChartCategory === 'credit' ? 'ring-2 ring-offset-2 ring-offset-themed ring-[#3b82f6]' : 'hover:opacity-80'}"
+			>
 				<p class="text-xs font-medium text-themed-secondary mb-1">Total Credit</p>
 				<p class="text-lg font-bold font-mono text-info">{formatBRL(aggregatedTotals.credit)}</p>
-			</div>
-			<div class="p-4 rounded-lg bg-themed-tertiary">
+			</button>
+			<button
+				type="button"
+				onclick={() => selectedChartCategory = 'total'}
+				class="p-4 rounded-lg bg-themed-tertiary text-left transition-all {selectedChartCategory === 'total' ? 'ring-2 ring-offset-2 ring-offset-themed ring-[#6b7280]' : 'hover:opacity-80'}"
+			>
 				<p class="text-xs font-medium text-themed-secondary mb-1">Total Paid</p>
 				<p class="text-lg font-bold font-mono text-themed">{formatBRL(aggregatedTotals.total)}</p>
-			</div>
-			<div class="p-4 rounded-lg bg-warning/10">
+			</button>
+			<button
+				type="button"
+				onclick={() => selectedChartCategory = 'realSpending'}
+				class="p-4 rounded-lg bg-warning/10 text-left transition-all {selectedChartCategory === 'realSpending' ? 'ring-2 ring-offset-2 ring-offset-themed ring-[#f59e0b]' : 'hover:opacity-80'}"
+			>
 				<p class="text-xs font-medium text-themed-secondary mb-1">Real Spending</p>
 				<p class="text-lg font-bold font-mono text-warning">{formatBRL(aggregatedTotals.realSpending)}</p>
-			</div>
+			</button>
 			<div class="p-4 rounded-lg {aggregatedTotals.debt > 0 ? 'bg-negative/10' : aggregatedTotals.debt < 0 ? 'bg-positive/10' : 'bg-themed-tertiary'}">
 				<p class="text-xs font-medium text-themed-secondary mb-1">Balance</p>
 				<p class="text-lg font-bold font-mono {aggregatedTotals.debt > 0 ? 'text-negative' : aggregatedTotals.debt < 0 ? 'text-positive' : 'text-themed'}">
@@ -124,11 +172,15 @@
 			</div>
 		</div>
 
-		<!-- All-Time Expense Categories -->
+		<!-- All-Time Expense Categories (Clickable) -->
 		<div class="mt-6 pt-6 border-t border-themed">
 			<h4 class="text-sm font-semibold text-themed-secondary uppercase tracking-wide mb-4">All-Time by Category</h4>
 			<div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
-				<div class="p-3 rounded-lg border border-themed">
+				<button
+					type="button"
+					onclick={() => selectedChartCategory = 'split5050Paid'}
+					class="p-3 rounded-lg border border-themed text-left transition-all {selectedChartCategory === 'split5050Paid' ? 'ring-2 ring-offset-2 ring-offset-themed ring-[#f59e0b]' : 'hover:opacity-80'}"
+				>
 					<div class="flex items-center gap-2 mb-2">
 						<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 							<circle cx="12" cy="12" r="10"/>
@@ -137,8 +189,12 @@
 						<p class="text-xs font-medium text-themed-secondary">50/50</p>
 					</div>
 					<p class="text-base font-bold font-mono text-themed">{formatBRL(aggregatedTotals.split5050Paid)}</p>
-				</div>
-				<div class="p-3 rounded-lg border border-themed">
+				</button>
+				<button
+					type="button"
+					onclick={() => selectedChartCategory = 'householdPaid'}
+					class="p-3 rounded-lg border border-themed text-left transition-all {selectedChartCategory === 'householdPaid' ? 'ring-2 ring-offset-2 ring-offset-themed ring-[#8b5cf6]' : 'hover:opacity-80'}"
+				>
 					<div class="flex items-center gap-2 mb-2">
 						<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-utilities" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 							<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
@@ -147,8 +203,12 @@
 						<p class="text-xs font-medium text-themed-secondary">Household</p>
 					</div>
 					<p class="text-base font-bold font-mono text-themed">{formatBRL(aggregatedTotals.householdPaid)}</p>
-				</div>
-				<div class="p-3 rounded-lg border border-themed">
+				</button>
+				<button
+					type="button"
+					onclick={() => selectedChartCategory = 'paidForPartner'}
+					class="p-3 rounded-lg border border-themed text-left transition-all {selectedChartCategory === 'paidForPartner' ? 'ring-2 ring-offset-2 ring-offset-themed ring-[#ec4899]' : 'hover:opacity-80'}"
+				>
 					<div class="flex items-center gap-2 mb-2">
 						<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-maria" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 							<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
@@ -156,8 +216,12 @@
 						<p class="text-xs font-medium text-themed-secondary">Paid for {partnerName}</p>
 					</div>
 					<p class="text-base font-bold font-mono text-themed">{formatBRL(aggregatedTotals.paidForPartner)}</p>
-				</div>
-				<div class="p-3 rounded-lg border border-themed">
+				</button>
+				<button
+					type="button"
+					onclick={() => selectedChartCategory = 'personal'}
+					class="p-3 rounded-lg border border-themed text-left transition-all {selectedChartCategory === 'personal' ? 'ring-2 ring-offset-2 ring-offset-themed ring-[#6b7280]' : 'hover:opacity-80'}"
+				>
 					<div class="flex items-center gap-2 mb-2">
 						<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-themed-secondary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 							<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -166,8 +230,12 @@
 						<p class="text-xs font-medium text-themed-secondary">Personal</p>
 					</div>
 					<p class="text-base font-bold font-mono text-themed">{formatBRL(aggregatedTotals.personal)}</p>
-				</div>
-				<div class="p-3 rounded-lg border border-themed">
+				</button>
+				<button
+					type="button"
+					onclick={() => selectedChartCategory = 'settlement'}
+					class="p-3 rounded-lg border border-themed text-left transition-all {selectedChartCategory === 'settlement' ? 'ring-2 ring-offset-2 ring-offset-themed ring-[#ef4444]' : 'hover:opacity-80'}"
+				>
 					<div class="flex items-center gap-2 mb-2">
 						<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-rent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 							<line x1="12" y1="1" x2="12" y2="23"/>
@@ -176,9 +244,25 @@
 						<p class="text-xs font-medium text-themed-secondary">Settlement</p>
 					</div>
 					<p class="text-base font-bold font-mono text-rent">{formatBRL(aggregatedTotals.settlement)}</p>
-				</div>
+				</button>
 			</div>
 		</div>
+
+		<!-- Chart -->
+		{#if chartData.labels.length > 0}
+			<div class="mt-6 pt-6 border-t border-themed">
+				<h4 class="text-sm font-semibold text-themed-secondary uppercase tracking-wide mb-4">
+					{selectedCategory.label} Evolution
+				</h4>
+				<LineChart
+					labels={chartData.labels}
+					data={chartData.data}
+					label={selectedCategory.label}
+					color={selectedCategory.chartColor}
+					height={250}
+				/>
+			</div>
+		{/if}
 	</Card>
 
 	{#if allPersonTotals.length === 0}
