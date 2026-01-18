@@ -59,15 +59,47 @@ export function formatDateForInput(date: Date): string {
 }
 
 /**
- * Parses DD/MM/YY or D/M/YY string to Date
+ * Parses date string to Date, supporting multiple formats:
+ * - DD/MM/YY or DD/MM/YYYY (Brazilian format with /)
+ * - YYYY-MM-DD (ISO format with -)
+ * - Google Sheets serial numbers
+ * Returns Invalid Date if no format matches (so errors are properly caught)
  */
 export function parseDateBR(dateStr: string): Date {
-	const parts = dateStr.split('/').map(Number);
-	if (parts.length !== 3) return new Date();
+	const trimmed = dateStr.trim();
 
-	const [day, month, year] = parts;
-	const fullYear = year < 100 ? (year < 50 ? 2000 + year : 1900 + year) : year;
-	return new Date(fullYear, month - 1, day);
+	// Try DD/MM/YY or DD/MM/YYYY format (with /)
+	if (trimmed.includes('/')) {
+		const parts = trimmed.split('/').map(Number);
+		if (parts.length === 3 && parts.every((p) => !isNaN(p))) {
+			const [day, month, year] = parts;
+			const fullYear = year < 100 ? (year < 50 ? 2000 + year : 1900 + year) : year;
+			return new Date(fullYear, month - 1, day);
+		}
+	}
+
+	// Try YYYY-MM-DD format (ISO with -)
+	if (trimmed.includes('-')) {
+		const parts = trimmed.split('-').map(Number);
+		if (parts.length === 3 && parts.every((p) => !isNaN(p))) {
+			const [year, month, day] = parts;
+			return new Date(year, month - 1, day);
+		}
+	}
+
+	// Try parsing as serial number (Google Sheets stores dates as days since Dec 30, 1899)
+	const serialNum = parseFloat(trimmed);
+	if (!isNaN(serialNum) && serialNum > 1 && serialNum < 100000) {
+		// Google Sheets epoch is December 30, 1899
+		const sheetsEpoch = new Date(1899, 11, 30);
+		const date = new Date(sheetsEpoch.getTime() + serialNum * 24 * 60 * 60 * 1000);
+		if (!isNaN(date.getTime())) {
+			return date;
+		}
+	}
+
+	// Return Invalid Date if no format matches
+	return new Date(NaN);
 }
 
 /**
