@@ -45,6 +45,25 @@ export function sumTransactions(transactions: Transaction[]): number {
 }
 
 /**
+ * Calculates totals by category for a set of transactions
+ * Only includes expense types (excludes Income, Credit, Settlement)
+ */
+export function calculateCategoryTotals(transactions: Transaction[]): Record<string, number> {
+	const categoryTotals: Record<string, number> = {};
+
+	// Only count expense types (not Income, Credit, or Settlement)
+	const expenseTypes = ['Household', 'Split 50/50', 'Personal', 'Paid for Partner'];
+
+	for (const tx of transactions) {
+		if (expenseTypes.includes(tx.type) && tx.category) {
+			categoryTotals[tx.category] = (categoryTotals[tx.category] || 0) + tx.amount;
+		}
+	}
+
+	return categoryTotals;
+}
+
+/**
  * Calculates income share for each person in a month
  */
 export function calculateShares(monthTransactions: Transaction[]): { lorenzo: number; maria: number } {
@@ -112,6 +131,10 @@ export function calculatePersonMonthlyTotals(
 	// This is your portion of shared expenses + personal + what partner paid for you
 	const realSpending = personal + split5050Portion + householdPortion + partnerPaidForMe;
 
+	// Calculate category totals for this person's transactions
+	const personTransactions = monthTransactions.filter((tx) => tx.owner === owner);
+	const categoryTotals = calculateCategoryTotals(personTransactions);
+
 	return {
 		owner,
 		monthKey,
@@ -127,7 +150,8 @@ export function calculatePersonMonthlyTotals(
 		settlement,
 		total,
 		debt,
-		realSpending
+		realSpending,
+		categoryTotals
 	};
 }
 
@@ -151,6 +175,9 @@ export function calculateCombinedMonthlyTotals(
 
 	const grandTotal = totalSplit5050 + totalPaidForPartner + totalHousehold + totalPersonal;
 
+	// Calculate combined category totals from all transactions
+	const categoryTotals = calculateCategoryTotals(monthTransactions);
+
 	return {
 		monthKey,
 		totalIncome,
@@ -161,6 +188,7 @@ export function calculateCombinedMonthlyTotals(
 		totalPersonal,
 		totalSettlement,
 		grandTotal,
+		categoryTotals,
 		lorenzo,
 		maria
 	};

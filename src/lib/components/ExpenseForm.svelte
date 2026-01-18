@@ -1,6 +1,6 @@
 <script lang="ts">
-	import type { Owner, ExpenseType } from '$lib/types';
-	import { EXPENSE_TYPES, OWNERS } from '$lib/types';
+	import type { Owner, ExpenseType, ExpenseCategory } from '$lib/types';
+	import { EXPENSE_TYPES, EXPENSE_CATEGORIES, OWNERS } from '$lib/types';
 	import { useExpenses } from '$lib/stores/expenses.svelte';
 	import { Card, Button, Input, Select, Avatar, DatePicker } from '$lib/components/ui';
 
@@ -16,6 +16,7 @@
 	let description = $state('');
 	let amount = $state('');
 	let type = $state<ExpenseType>('Household');
+	let category = $state<ExpenseCategory | ''>('');
 	let date = $state(new Date());
 
 	let error = $state('');
@@ -24,6 +25,10 @@
 
 	const ownerOptions = OWNERS.map((o) => ({ value: o, label: o }));
 	const typeOptions = EXPENSE_TYPES.map((t) => ({ value: t, label: t }));
+	const categoryOptions = [
+		{ value: '', label: 'No category' },
+		...EXPENSE_CATEGORIES.map((c) => ({ value: c, label: c }))
+	];
 
 	async function handleSubmit(e: Event) {
 		e.preventDefault();
@@ -63,7 +68,8 @@
 					description: description.trim(),
 					amount: parsedAmount,
 					type,
-					date: date.toISOString()
+					date: date.toISOString(),
+					category: category || undefined
 				})
 			});
 
@@ -76,6 +82,7 @@
 			// Reset form and show success
 			description = '';
 			amount = '';
+			category = '';
 			date = new Date();
 			success = true;
 
@@ -167,13 +174,21 @@
 			/>
 		</div>
 
-		<Input
-			type="text"
-			label="Description"
-			bind:value={description}
-			placeholder="What was this expense for?"
-			required
-		/>
+		<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+			<Input
+				type="text"
+				label="Description"
+				bind:value={description}
+				placeholder="What was this expense for?"
+				required
+			/>
+
+			<Select
+				label="Category"
+				bind:value={category}
+				options={categoryOptions}
+			/>
+		</div>
 
 		<DatePicker
 			label="Date"

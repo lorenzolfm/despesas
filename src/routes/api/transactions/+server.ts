@@ -30,7 +30,7 @@ export const GET: RequestHandler = async () => {
 		// Fetch all data from the first sheet
 		const response = await sheets.spreadsheets.values.get({
 			spreadsheetId: GOOGLE_SHEETS_ID,
-			range: 'A:E' // Columns A through E (Owner, Description, Amount, Type, Date)
+			range: 'A:F' // Columns A through F (Owner, Description, Amount, Type, Date, Category)
 		});
 
 		const rows = response.data.values;
@@ -78,9 +78,9 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		// Parse request body
 		const body = await request.json();
-		const { owner, description, amount, type, date } = body;
+		const { owner, description, amount, type, date, category } = body;
 
-		// Validate required fields
+		// Validate required fields (category is optional)
 		if (!owner || !description || amount === undefined || !type || !date) {
 			return json(
 				{ error: 'Missing required fields: owner, description, amount, type, date' },
@@ -139,14 +139,15 @@ export const POST: RequestHandler = async ({ request }) => {
 			description,
 			amount,
 			type,
-			date: parsedDate
+			date: parsedDate,
+			category: category || undefined
 		};
 		const rowData = transactionToSheetRow(transaction);
 
 		// Append the row to the sheet
 		await sheets.spreadsheets.values.append({
 			spreadsheetId: GOOGLE_SHEETS_ID,
-			range: 'A:E',
+			range: 'A:F',
 			valueInputOption: 'USER_ENTERED',
 			insertDataOption: 'INSERT_ROWS',
 			requestBody: {
@@ -296,7 +297,7 @@ export const PUT: RequestHandler = async ({ request }) => {
 		}
 
 		const { rowNumber, description: origDesc } = original;
-		const { owner, description, amount, type, date } = updated;
+		const { owner, description, amount, type, date, category } = updated;
 
 		// Validate original fields (only need rowNumber and description for identification)
 		if (!rowNumber || !origDesc) {
@@ -390,14 +391,15 @@ export const PUT: RequestHandler = async ({ request }) => {
 			description,
 			amount,
 			type,
-			date: parsedDate
+			date: parsedDate,
+			category: category || undefined
 		};
 		const rowData = transactionToSheetRow(transaction);
 
 		// Update the row using rowNumber directly (already 1-indexed)
 		await sheets.spreadsheets.values.update({
 			spreadsheetId: GOOGLE_SHEETS_ID,
-			range: `A${rowNumber}:E${rowNumber}`,
+			range: `A${rowNumber}:F${rowNumber}`,
 			valueInputOption: 'USER_ENTERED',
 			requestBody: {
 				values: [rowData]

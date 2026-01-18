@@ -2,8 +2,8 @@
 	import { useExpenses } from '$lib/stores/expenses.svelte';
 	import { formatBRL, formatRelativeDate, groupTransactionsByDate } from '$lib/utils/format';
 	import { Card, Avatar, Badge, Button, Input, Modal, Select, DatePicker } from '$lib/components/ui';
-	import type { ExpenseType, Transaction, Owner } from '$lib/types';
-	import { EXPENSE_TYPES, OWNERS } from '$lib/types';
+	import type { ExpenseType, ExpenseCategory, Transaction, Owner } from '$lib/types';
+	import { EXPENSE_TYPES, EXPENSE_CATEGORIES, OWNERS } from '$lib/types';
 
 	interface Props {
 		onDelete?: () => void;
@@ -33,6 +33,7 @@
 		description: string;
 		amount: string;
 		type: ExpenseType;
+		category: ExpenseCategory | '';
 		date: Date;
 	}>({
 		open: false,
@@ -43,10 +44,15 @@
 		description: '',
 		amount: '',
 		type: 'Household',
+		category: '',
 		date: new Date()
 	});
 
 	const typeOptions = EXPENSE_TYPES.map((t) => ({ value: t, label: t }));
+	const categoryOptions = [
+		{ value: '', label: 'No category' },
+		...EXPENSE_CATEGORIES.map((c) => ({ value: c, label: c }))
+	];
 
 	// Get today's date at midnight for comparison
 	const today = new Date();
@@ -124,6 +130,7 @@
 			description: tx.description,
 			amount: tx.amount.toString().replace('.', ','),
 			type: tx.type,
+			category: tx.category || '',
 			date: new Date(tx.date)
 		};
 	}
@@ -138,6 +145,7 @@
 			description: '',
 			amount: '',
 			type: 'Household',
+			category: '',
 			date: new Date()
 		};
 	}
@@ -182,6 +190,7 @@
 						description: editModal.description.trim(),
 						amount: parsedAmount,
 						type: editModal.type,
+						category: editModal.category || undefined,
 						date: editModal.date.toISOString()
 					}
 				})
@@ -330,13 +339,18 @@
 
 							<!-- Transaction Details -->
 							<div class="flex-1 min-w-0">
-								<div class="flex items-center gap-2 mb-0.5">
+								<div class="flex items-center gap-2 mb-0.5 flex-wrap">
 									<span class="font-medium text-themed truncate">
 										{tx.description}
 									</span>
 									<Badge variant={getTypeBadgeVariant(tx.type)} size="sm">
 										{tx.type}
 									</Badge>
+									{#if tx.category}
+										<Badge variant="default" size="sm">
+											{tx.category}
+										</Badge>
+									{/if}
 								</div>
 								<p class="text-sm text-themed-secondary">
 									{tx.owner}
@@ -437,28 +451,39 @@
 			</div>
 		</fieldset>
 
-		<Select
-			label="Type"
-			bind:value={editModal.type}
-			options={typeOptions}
-			disabled={editModal.isUpdating}
-		/>
+		<div class="grid grid-cols-2 gap-4">
+			<Select
+				label="Type"
+				bind:value={editModal.type}
+				options={typeOptions}
+				disabled={editModal.isUpdating}
+			/>
 
-		<Input
-			type="text"
-			label="Amount (R$)"
-			bind:value={editModal.amount}
-			placeholder="0,00"
-			disabled={editModal.isUpdating}
-		/>
+			<Select
+				label="Category"
+				bind:value={editModal.category}
+				options={categoryOptions}
+				disabled={editModal.isUpdating}
+			/>
+		</div>
 
-		<Input
-			type="text"
-			label="Description"
-			bind:value={editModal.description}
-			placeholder="What was this expense for?"
-			disabled={editModal.isUpdating}
-		/>
+		<div class="grid grid-cols-2 gap-4">
+			<Input
+				type="text"
+				label="Amount (R$)"
+				bind:value={editModal.amount}
+				placeholder="0,00"
+				disabled={editModal.isUpdating}
+			/>
+
+			<Input
+				type="text"
+				label="Description"
+				bind:value={editModal.description}
+				placeholder="What was this expense for?"
+				disabled={editModal.isUpdating}
+			/>
+		</div>
 
 		<DatePicker
 			label="Date"

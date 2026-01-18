@@ -19,6 +19,29 @@ export const EXPENSE_TYPES: ExpenseType[] = [
 	'Settlement'
 ];
 
+export type ExpenseCategory =
+	| 'Mercado'
+	| 'Transporte'
+	| 'Água'
+	| 'Luz'
+	| 'Comida boa'
+	| 'Filho'
+	| 'Entreterimento'
+	| 'Saúde'
+	| 'Casa';
+
+export const EXPENSE_CATEGORIES: ExpenseCategory[] = [
+	'Mercado',
+	'Transporte',
+	'Água',
+	'Luz',
+	'Comida boa',
+	'Filho',
+	'Entreterimento',
+	'Saúde',
+	'Casa'
+];
+
 export const OWNERS: Owner[] = ['Lorenzo', 'Maria'];
 
 export interface Transaction {
@@ -29,6 +52,7 @@ export interface Transaction {
 	amount: number;
 	type: ExpenseType;
 	date: Date;
+	category?: ExpenseCategory; // Optional expense category
 }
 
 export interface MonthKey {
@@ -52,6 +76,7 @@ export interface PersonMonthlyTotals {
 	total: number;
 	debt: number; // Positive = owes partner, Negative = partner owes them
 	realSpending: number; // What they actually spend after reimbursements
+	categoryTotals: Record<string, number>; // Totals by expense category
 }
 
 export interface CombinedMonthlyTotals {
@@ -64,6 +89,7 @@ export interface CombinedMonthlyTotals {
 	totalPersonal: number;
 	totalSettlement: number;
 	grandTotal: number;
+	categoryTotals: Record<string, number>; // Combined totals by expense category
 	lorenzo: PersonMonthlyTotals;
 	maria: PersonMonthlyTotals;
 }

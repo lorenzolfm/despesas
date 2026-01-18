@@ -1,8 +1,9 @@
 <script lang="ts">
 	import type { MonthKey } from '$lib/types';
+	import { EXPENSE_CATEGORIES } from '$lib/types';
 	import { useExpenses } from '$lib/stores/expenses.svelte';
 	import { formatBRL, formatMonthYear, getMonthRange, formatDate, getMonthKey } from '$lib/utils/format';
-	import { Card, Avatar, Badge, Select, LineChart } from '$lib/components/ui';
+	import { Card, Avatar, Badge, Select, LineChart, PieChart } from '$lib/components/ui';
 
 	const expenses = useExpenses();
 
@@ -47,16 +48,21 @@
 	);
 
 	// Calculate aggregated totals across all months up to current
-	const aggregatedTotals = $derived({
-		totalIncome: monthlyTotalsUpToCurrent.reduce((sum, m) => sum + m.totalIncome, 0),
-		totalCredit: monthlyTotalsUpToCurrent.reduce((sum, m) => sum + m.totalCredit, 0),
-		totalSplit5050: monthlyTotalsUpToCurrent.reduce((sum, m) => sum + m.totalSplit5050, 0),
-		totalPaidForPartner: monthlyTotalsUpToCurrent.reduce((sum, m) => sum + m.totalPaidForPartner, 0),
-		totalHousehold: monthlyTotalsUpToCurrent.reduce((sum, m) => sum + m.totalHousehold, 0),
-		totalPersonal: monthlyTotalsUpToCurrent.reduce((sum, m) => sum + m.totalPersonal, 0),
-		grandTotal: monthlyTotalsUpToCurrent.reduce((sum, m) => sum + m.grandTotal, 0),
-		lorenzoIncome: monthlyTotalsUpToCurrent.reduce((sum, m) => sum + m.lorenzo.income, 0),
-		mariaIncome: monthlyTotalsUpToCurrent.reduce((sum, m) => sum + m.maria.income, 0)
+	const aggregatedTotals = $derived.by(() => {
+		const totalIncome = monthlyTotalsUpToCurrent.reduce((sum, m) => sum + m.totalIncome, 0);
+		const totalCredit = monthlyTotalsUpToCurrent.reduce((sum, m) => sum + m.totalCredit, 0);
+		return {
+			totalIncome,
+			totalCredit,
+			totalRevenue: totalIncome + totalCredit,
+			totalSplit5050: monthlyTotalsUpToCurrent.reduce((sum, m) => sum + m.totalSplit5050, 0),
+			totalPaidForPartner: monthlyTotalsUpToCurrent.reduce((sum, m) => sum + m.totalPaidForPartner, 0),
+			totalHousehold: monthlyTotalsUpToCurrent.reduce((sum, m) => sum + m.totalHousehold, 0),
+			totalPersonal: monthlyTotalsUpToCurrent.reduce((sum, m) => sum + m.totalPersonal, 0),
+			grandTotal: monthlyTotalsUpToCurrent.reduce((sum, m) => sum + m.grandTotal, 0),
+			lorenzoIncome: monthlyTotalsUpToCurrent.reduce((sum, m) => sum + m.lorenzo.income, 0),
+			mariaIncome: monthlyTotalsUpToCurrent.reduce((sum, m) => sum + m.maria.income, 0)
+		};
 	});
 
 	// Calculate aggregated share percentages
@@ -71,10 +77,35 @@
 		};
 	});
 
+	// Aggregated category totals across all months
+	const aggregatedCategoryTotals = $derived.by(() => {
+		const totals: Record<string, number> = {};
+		for (const month of monthlyTotalsUpToCurrent) {
+			for (const [category, amount] of Object.entries(month.categoryTotals)) {
+				totals[category] = (totals[category] || 0) + amount;
+			}
+		}
+		return totals;
+	});
+
+	// Category colors for charts
+	const categoryColors: Record<string, string> = {
+		'Mercado': '#22c55e',
+		'Transporte': '#3b82f6',
+		'Água': '#06b6d4',
+		'Luz': '#f59e0b',
+		'Comida boa': '#ec4899',
+		'Filho': '#8b5cf6',
+		'Entreterimento': '#f97316',
+		'Saúde': '#ef4444',
+		'Casa': '#6b7280'
+	};
+
 	// Expense categories for breakdown
 	const categories = [
 		{ key: 'totalIncome', label: 'Income', color: 'text-positive', bgColor: 'bg-positive/10', chartColor: '#22c55e' },
 		{ key: 'totalCredit', label: 'Credit', color: 'text-info', bgColor: 'bg-info/10', chartColor: '#3b82f6' },
+		{ key: 'totalRevenue', label: 'Total Revenue', color: 'text-primary', bgColor: 'bg-primary/10', chartColor: '#6366f1' },
 		{ key: 'totalSplit5050', label: 'Split 50/50', color: 'text-warning', bgColor: 'bg-warning/10', chartColor: '#f59e0b' },
 		{ key: 'totalPaidForPartner', label: 'Paid for Partner', color: 'text-maria', bgColor: 'bg-maria/10', chartColor: '#ec4899' },
 		{ key: 'totalHousehold', label: 'Household', color: 'text-utilities', bgColor: 'bg-utilities/10', chartColor: '#8b5cf6' },
@@ -94,7 +125,12 @@
 		const sorted = [...monthlyTotalsUpToCurrent].sort((a, b) => compareMonthKeys(a.monthKey, b.monthKey));
 		return {
 			labels: sorted.map((m) => formatMonthYear(m.monthKey)),
-			data: sorted.map((m) => m[selectedChartCategory])
+			data: sorted.map((m) => {
+				if (selectedChartCategory === 'totalRevenue') {
+					return m.totalIncome + m.totalCredit;
+				}
+				return m[selectedChartCategory];
+			})
 		};
 	});
 </script>
@@ -121,7 +157,7 @@
 		</div>
 
 		<!-- Aggregated Category Breakdown (Clickable) -->
-		<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+		<div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
 			{#each categories as cat}
 				{@const value = aggregatedTotals[cat.key]}
 				{@const isSelected = selectedChartCategory === cat.key}
@@ -174,6 +210,41 @@
 							<p class="text-lg font-bold text-maria">{aggregatedShares().maria}%</p>
 						</div>
 					</div>
+				</div>
+			</div>
+		{/if}
+
+		<!-- By Category Breakdown -->
+		{#if Object.keys(aggregatedCategoryTotals).length > 0}
+			{@const allTimePieData = Object.entries(aggregatedCategoryTotals)
+				.filter(([_, amount]) => amount > 0)
+				.map(([category, amount]) => ({
+					label: category,
+					value: amount,
+					color: categoryColors[category] || '#6b7280'
+				}))}
+			<div class="mt-6 pt-6 border-t border-themed">
+				<h4 class="text-sm font-semibold text-themed-secondary uppercase tracking-wide mb-4">By Category (All Time)</h4>
+				<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+					<div class="grid grid-cols-2 gap-2">
+						{#each EXPENSE_CATEGORIES as cat}
+							{@const amount = aggregatedCategoryTotals[cat] || 0}
+							{#if amount > 0}
+								<div class="p-2 rounded-lg border border-themed flex items-center gap-2">
+									<div class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {categoryColors[cat]}"></div>
+									<div class="min-w-0">
+										<p class="text-xs text-themed-secondary truncate">{cat}</p>
+										<p class="text-sm font-bold font-mono text-themed">{formatBRL(amount)}</p>
+									</div>
+								</div>
+							{/if}
+						{/each}
+					</div>
+					{#if allTimePieData.length > 0}
+						<div class="flex items-center justify-center">
+							<PieChart data={allTimePieData} height={200} />
+						</div>
+					{/if}
 				</div>
 			</div>
 		{/if}
@@ -231,9 +302,9 @@
 				</div>
 
 				<!-- Category Breakdown -->
-				<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
+				<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3 mb-6">
 					{#each categories as cat}
-						{@const value = month[cat.key]}
+						{@const value = cat.key === 'totalRevenue' ? month.totalIncome + month.totalCredit : month[cat.key]}
 						<div class="p-3 rounded-lg {cat.bgColor}">
 							<p class="text-xs font-medium text-themed-secondary mb-1">{cat.label}</p>
 							<p class="text-sm font-semibold font-mono {cat.color}">
@@ -248,6 +319,41 @@
 					<span class="font-medium text-themed">Total Expenses</span>
 					<span class="text-xl font-bold font-mono text-themed">{formatBRL(month.grandTotal)}</span>
 				</div>
+
+				<!-- By Category (Monthly) with Pie Chart -->
+				{#if Object.keys(month.categoryTotals).length > 0}
+					{@const pieData = Object.entries(month.categoryTotals)
+						.filter(([_, amount]) => amount > 0)
+						.map(([category, amount]) => ({
+							label: category,
+							value: amount,
+							color: categoryColors[category] || '#6b7280'
+						}))}
+					<div class="mb-6">
+						<h4 class="text-sm font-semibold text-themed-secondary uppercase tracking-wide mb-4">By Category</h4>
+						<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+							<div class="grid grid-cols-2 gap-2">
+								{#each EXPENSE_CATEGORIES as cat}
+									{@const amount = month.categoryTotals[cat] || 0}
+									{#if amount > 0}
+										<div class="p-2 rounded-lg border border-themed flex items-center gap-2">
+											<div class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {categoryColors[cat]}"></div>
+											<div class="min-w-0">
+												<p class="text-xs text-themed-secondary truncate">{cat}</p>
+												<p class="text-sm font-bold font-mono text-themed">{formatBRL(amount)}</p>
+											</div>
+										</div>
+									{/if}
+								{/each}
+							</div>
+							{#if pieData.length > 0}
+								<div class="flex items-center justify-center">
+									<PieChart data={pieData} height={200} />
+								</div>
+							{/if}
+						</div>
+					</div>
+				{/if}
 
 				<!-- Person Breakdown -->
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">

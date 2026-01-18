@@ -1,4 +1,5 @@
-import type { Transaction, Owner, ExpenseType } from '$lib/types';
+import type { Transaction, Owner, ExpenseType, ExpenseCategory } from '$lib/types';
+import { EXPENSE_CATEGORIES } from '$lib/types';
 import { parseBRL, parseDateBR } from './format';
 
 // Portuguese to English type mapping
@@ -74,8 +75,9 @@ export function parseSheetData(rows: string[][]): ParseResult {
 	const amountIdx = headers.findIndex((h) => h === 'valor' || h === 'amount');
 	const typeIdx = headers.findIndex((h) => h === 'tipo' || h === 'type');
 	const dateIdx = headers.findIndex((h) => h === 'data' || h === 'date');
+	const categoryIdx = headers.findIndex((h) => h === 'categoria' || h === 'category');
 
-	// Validate required columns
+	// Validate required columns (category is optional)
 	if (ownerIdx === -1 || descIdx === -1 || amountIdx === -1 || typeIdx === -1 || dateIdx === -1) {
 		return {
 			transactions: [],
@@ -102,6 +104,7 @@ export function parseSheetData(rows: string[][]): ParseResult {
 		const amountStr = String(row[amountIdx] ?? '').trim();
 		const typeStr = String(row[typeIdx] ?? '').trim();
 		const dateStr = String(row[dateIdx] ?? '').trim();
+		const categoryStr = categoryIdx >= 0 ? String(row[categoryIdx] ?? '').trim() : '';
 
 		// Validate owner
 		if (!VALID_OWNERS.includes(owner as Owner)) {
@@ -134,6 +137,12 @@ export function parseSheetData(rows: string[][]): ParseResult {
 			continue;
 		}
 
+		// Parse category (optional - only set if valid)
+		const category: ExpenseCategory | undefined =
+			categoryStr && EXPENSE_CATEGORIES.includes(categoryStr as ExpenseCategory)
+				? (categoryStr as ExpenseCategory)
+				: undefined;
+
 		transactions.push({
 			id: generateId(),
 			rowNumber: i + 1, // 1-indexed (row 1 is header, row 2 is first data = i=1)
@@ -141,7 +150,8 @@ export function parseSheetData(rows: string[][]): ParseResult {
 			description,
 			amount,
 			type: expenseType,
-			date
+			date,
+			category
 		});
 	}
 
@@ -173,7 +183,7 @@ function formatDateForSheet(date: Date): string {
 
 /**
  * Converts a transaction to a row format for Google Sheets
- * Returns: [Owner, Description, Amount, Type, Date]
+ * Returns: [Owner, Description, Amount, Type, Date, Category]
  */
 export function transactionToSheetRow(tx: Omit<Transaction, 'id'>): (string | number)[] {
 	return [
@@ -181,6 +191,7 @@ export function transactionToSheetRow(tx: Omit<Transaction, 'id'>): (string | nu
 		tx.description,                    // Column B: Description
 		tx.amount,                         // Column C: Amount (raw number for Sheets)
 		REVERSE_TYPE_MAP[tx.type],         // Column D: Type (Portuguese)
-		formatDateForSheet(tx.date)        // Column E: Date (YYYY-MM-DD)
+		formatDateForSheet(tx.date),       // Column E: Date (YYYY-MM-DD)
+		tx.category || ''                  // Column F: Category (optional)
 	];
 }

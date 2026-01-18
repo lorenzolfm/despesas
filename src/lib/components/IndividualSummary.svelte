@@ -1,8 +1,9 @@
 <script lang="ts">
 	import type { Owner, MonthKey } from '$lib/types';
+	import { EXPENSE_CATEGORIES } from '$lib/types';
 	import { useExpenses } from '$lib/stores/expenses.svelte';
 	import { formatBRL, formatMonthYear, formatPercent, getMonthRange, formatDate, getMonthKey } from '$lib/utils/format';
-	import { Card, Avatar, Badge, Select, LineChart } from '$lib/components/ui';
+	import { Card, Avatar, Badge, Select, LineChart, PieChart } from '$lib/components/ui';
 
 	interface Props {
 		owner: Owner;
@@ -75,15 +76,41 @@
 		const paidForPartner = personTotalsUpToCurrent.reduce((sum, p) => sum + p.paidForPartner, 0);
 		const personal = personTotalsUpToCurrent.reduce((sum, p) => sum + p.personal, 0);
 		const settlement = personTotalsUpToCurrent.reduce((sum, p) => sum + p.settlement, 0);
-		return { income, credit, total, debt, realSpending, split5050Paid, householdPaid, paidForPartner, personal, settlement };
+		const revenue = income + credit;
+		return { income, credit, revenue, total, debt, realSpending, split5050Paid, householdPaid, paidForPartner, personal, settlement };
 	});
 
+	// Aggregated category totals for this person
+	const aggregatedCategoryTotals = $derived.by(() => {
+		const totals: Record<string, number> = {};
+		for (const month of personTotalsUpToCurrent) {
+			for (const [category, amount] of Object.entries(month.categoryTotals)) {
+				totals[category] = (totals[category] || 0) + amount;
+			}
+		}
+		return totals;
+	});
+
+	// Category colors for charts
+	const categoryColors: Record<string, string> = {
+		'Mercado': '#22c55e',
+		'Transporte': '#3b82f6',
+		'Água': '#06b6d4',
+		'Luz': '#f59e0b',
+		'Comida boa': '#ec4899',
+		'Filho': '#8b5cf6',
+		'Entreterimento': '#f97316',
+		'Saúde': '#ef4444',
+		'Casa': '#6b7280'
+	};
+
 	// Categories for chart selection
-	type CategoryKey = 'income' | 'credit' | 'total' | 'realSpending' | 'split5050Paid' | 'householdPaid' | 'paidForPartner' | 'personal' | 'settlement';
+	type CategoryKey = 'income' | 'credit' | 'revenue' | 'total' | 'realSpending' | 'split5050Paid' | 'householdPaid' | 'paidForPartner' | 'personal' | 'settlement';
 
 	const chartCategories: { key: CategoryKey; label: string; chartColor: string }[] = [
 		{ key: 'income', label: 'Income', chartColor: '#22c55e' },
 		{ key: 'credit', label: 'Credit', chartColor: '#3b82f6' },
+		{ key: 'revenue', label: 'Total Revenue', chartColor: '#6366f1' },
 		{ key: 'total', label: 'Total Paid', chartColor: '#6b7280' },
 		{ key: 'realSpending', label: 'Real Spending', chartColor: '#f59e0b' },
 		{ key: 'split5050Paid', label: '50/50', chartColor: '#f59e0b' },
@@ -106,7 +133,12 @@
 		const sorted = [...personTotalsUpToCurrent].sort((a, b) => compareMonthKeys(a.monthKey, b.monthKey));
 		return {
 			labels: sorted.map((m) => formatMonthYear(m.monthKey)),
-			data: sorted.map((m) => m[selectedChartCategory])
+			data: sorted.map((m) => {
+				if (selectedChartCategory === 'revenue') {
+					return m.income + m.credit;
+				}
+				return m[selectedChartCategory];
+			})
 		};
 	});
 </script>
@@ -131,7 +163,7 @@
 		</div>
 
 		<!-- Aggregated Stats Grid (Clickable) -->
-		<div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
+		<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
 			<button
 				type="button"
 				onclick={() => selectedChartCategory = 'income'}
@@ -147,6 +179,14 @@
 			>
 				<p class="text-xs font-medium text-themed-secondary mb-1">Total Credit</p>
 				<p class="text-lg font-bold font-mono text-info">{formatBRL(aggregatedTotals.credit)}</p>
+			</button>
+			<button
+				type="button"
+				onclick={() => selectedChartCategory = 'revenue'}
+				class="p-4 rounded-lg bg-primary/10 text-left transition-all {selectedChartCategory === 'revenue' ? 'ring-2 ring-offset-2 ring-offset-themed ring-[#6366f1]' : 'hover:opacity-80'}"
+			>
+				<p class="text-xs font-medium text-themed-secondary mb-1">Total Revenue</p>
+				<p class="text-lg font-bold font-mono text-primary">{formatBRL(aggregatedTotals.revenue)}</p>
 			</button>
 			<button
 				type="button"
@@ -248,6 +288,41 @@
 			</div>
 		</div>
 
+		<!-- By Expense Category (All Time) -->
+		{#if Object.keys(aggregatedCategoryTotals).length > 0}
+			{@const allTimePieData = Object.entries(aggregatedCategoryTotals)
+				.filter(([_, amount]) => amount > 0)
+				.map(([category, amount]) => ({
+					label: category,
+					value: amount,
+					color: categoryColors[category] || '#6b7280'
+				}))}
+			<div class="mt-6 pt-6 border-t border-themed">
+				<h4 class="text-sm font-semibold text-themed-secondary uppercase tracking-wide mb-4">By Expense Category (All Time)</h4>
+				<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+					<div class="grid grid-cols-2 gap-2">
+						{#each EXPENSE_CATEGORIES as cat}
+							{@const amount = aggregatedCategoryTotals[cat] || 0}
+							{#if amount > 0}
+								<div class="p-2 rounded-lg border border-themed flex items-center gap-2">
+									<div class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {categoryColors[cat]}"></div>
+									<div class="min-w-0">
+										<p class="text-xs text-themed-secondary truncate">{cat}</p>
+										<p class="text-sm font-bold font-mono text-themed">{formatBRL(amount)}</p>
+									</div>
+								</div>
+							{/if}
+						{/each}
+					</div>
+					{#if allTimePieData.length > 0}
+						<div class="flex items-center justify-center">
+							<PieChart data={allTimePieData} height={200} />
+						</div>
+					{/if}
+				</div>
+			</div>
+		{/if}
+
 		<!-- Chart -->
 		{#if chartData.labels.length > 0}
 			<div class="mt-6 pt-6 border-t border-themed">
@@ -318,7 +393,7 @@
 				</div>
 
 				<!-- Summary Stats -->
-				<div class="grid grid-cols-2 sm:grid-cols-5 gap-4 mb-6">
+				<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
 					<div class="p-4 rounded-lg bg-positive/10">
 						<p class="text-xs font-medium text-themed-secondary mb-1">Income</p>
 						<p class="text-lg font-bold font-mono text-positive">{formatBRL(person.income)}</p>
@@ -326,6 +401,10 @@
 					<div class="p-4 rounded-lg bg-info/10">
 						<p class="text-xs font-medium text-themed-secondary mb-1">Credit</p>
 						<p class="text-lg font-bold font-mono text-info">{formatBRL(person.credit)}</p>
+					</div>
+					<div class="p-4 rounded-lg bg-primary/10">
+						<p class="text-xs font-medium text-themed-secondary mb-1">Total Revenue</p>
+						<p class="text-lg font-bold font-mono text-primary">{formatBRL(person.income + person.credit)}</p>
 					</div>
 					<div class="p-4 rounded-lg bg-themed-tertiary">
 						<p class="text-xs font-medium text-themed-secondary mb-1">Total Paid</p>
@@ -408,6 +487,41 @@
 						</div>
 					</div>
 				</div>
+
+				<!-- By Category (Monthly) with Pie Chart -->
+				{#if Object.keys(person.categoryTotals).length > 0}
+					{@const pieData = Object.entries(person.categoryTotals)
+						.filter(([_, amount]) => amount > 0)
+						.map(([category, amount]) => ({
+							label: category,
+							value: amount,
+							color: categoryColors[category] || '#6b7280'
+						}))}
+					<div class="mt-6 space-y-4">
+						<h4 class="text-sm font-semibold text-themed-secondary uppercase tracking-wide">By Expense Category</h4>
+						<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+							<div class="grid grid-cols-2 gap-2">
+								{#each EXPENSE_CATEGORIES as cat}
+									{@const amount = person.categoryTotals[cat] || 0}
+									{#if amount > 0}
+										<div class="p-2 rounded-lg border border-themed flex items-center gap-2">
+											<div class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {categoryColors[cat]}"></div>
+											<div class="min-w-0">
+												<p class="text-xs text-themed-secondary truncate">{cat}</p>
+												<p class="text-sm font-bold font-mono text-themed">{formatBRL(amount)}</p>
+											</div>
+										</div>
+									{/if}
+								{/each}
+							</div>
+							{#if pieData.length > 0}
+								<div class="flex items-center justify-center">
+									<PieChart data={pieData} height={200} />
+								</div>
+							{/if}
+						</div>
+					</div>
+				{/if}
 
 				<!-- Debt Result -->
 				<div class="mt-6 p-4 rounded-xl {person.debt > 0 ? 'bg-negative/10 border border-negative/20' : person.debt < 0 ? 'bg-positive/10 border border-positive/20' : 'bg-themed-secondary'}">
