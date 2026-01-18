@@ -95,11 +95,8 @@
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify({
-					owner: tx.owner,
-					description: tx.description,
-					amount: tx.amount,
-					type: tx.type,
-					date: tx.date.toISOString()
+					rowNumber: tx.rowNumber,
+					description: tx.description
 				})
 			});
 
@@ -177,11 +174,8 @@
 				},
 				body: JSON.stringify({
 					original: {
-						owner: original.owner,
-						description: original.description,
-						amount: original.amount,
-						type: original.type,
-						date: original.date.toISOString()
+						rowNumber: original.rowNumber,
+						description: original.description
 					},
 					updated: {
 						owner: editModal.owner,

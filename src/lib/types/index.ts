@@ -23,6 +23,7 @@ export const OWNERS: Owner[] = ['Lorenzo', 'Maria'];
 
 export interface Transaction {
 	id: string;
+	rowNumber: number; // 1-indexed row in Google Sheets
 	owner: Owner;
 	description: string;
 	amount: number;

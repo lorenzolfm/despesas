@@ -189,12 +189,12 @@ export const DELETE: RequestHandler = async ({ request }) => {
 
 		// Parse request body
 		const body = await request.json();
-		const { owner, description, amount, type, date } = body;
+		const { rowNumber, description } = body;
 
 		// Validate required fields
-		if (!owner || !description || amount === undefined || !type || !date) {
+		if (!rowNumber || !description) {
 			return json(
-				{ error: 'Missing required fields: owner, description, amount, type, date' },
+				{ error: 'Missing required fields: rowNumber, description' },
 				{ status: 400 }
 			);
 		}
@@ -210,76 +210,28 @@ export const DELETE: RequestHandler = async ({ request }) => {
 
 		const sheets = google.sheets({ version: 'v4', auth });
 
-		// Fetch all data to find the row to delete
+		// Fetch the specific row to verify it exists and matches
 		const response = await sheets.spreadsheets.values.get({
 			spreadsheetId: GOOGLE_SHEETS_ID,
-			range: 'A:E'
+			range: `A${rowNumber}:E${rowNumber}`
 		});
 
 		const rows = response.data.values;
-		if (!rows || rows.length < 2) {
+		if (!rows || rows.length === 0) {
 			return json(
-				{ error: 'No transactions found to delete.' },
+				{ error: 'Transaction not found at specified row.' },
 				{ status: 404 }
 			);
 		}
 
-		// Parse the transaction date for comparison
-		const txDate = new Date(date);
-		const txDay = txDate.getUTCDate();
-		const txMonth = txDate.getUTCMonth() + 1;
-		const txYear = txDate.getUTCFullYear();
+		const row = rows[0];
+		const rowDesc = row[1]; // Description is column B (index 1)
 
-		// Find the row index that matches (skip header row)
-		let rowIndexToDelete = -1;
-		for (let i = 1; i < rows.length; i++) {
-			const row = rows[i];
-			if (!row || row.length < 5) continue;
-
-			const [rowOwner, rowDesc, rowAmount, rowType, rowDate] = row;
-
-			// Check owner and description match
-			if (rowOwner !== owner || rowDesc !== description) continue;
-
-			// Check amount (parse the formatted amount)
-			const parsedAmount = parseFloat(
-				String(rowAmount)
-					.replace(/R\$\s*/g, '')
-					.replace(/\./g, '')
-					.replace(',', '.')
-			) || 0;
-			if (Math.abs(parsedAmount - amount) > 0.01) continue;
-
-			// Check date - parse various formats
-			let dateMatch = false;
-			const dateStr = String(rowDate);
-
-			// Try YYYY-MM-DD format
-			if (dateStr.includes('-')) {
-				const [y, m, d] = dateStr.split('-').map(Number);
-				dateMatch = d === txDay && m === txMonth && y === txYear;
-			}
-			// Try DD/MM/YY or DD/MM/YYYY format
-			else if (dateStr.includes('/')) {
-				const parts = dateStr.split('/').map(Number);
-				if (parts.length === 3) {
-					const [d, m, y] = parts;
-					const fullYear = y < 100 ? (y < 50 ? 2000 + y : 1900 + y) : y;
-					dateMatch = d === txDay && m === txMonth && fullYear === txYear;
-				}
-			}
-
-			if (!dateMatch) continue;
-
-			// Found a match
-			rowIndexToDelete = i;
-			break;
-		}
-
-		if (rowIndexToDelete === -1) {
+		// Sanity check: verify description matches
+		if (rowDesc !== description) {
 			return json(
-				{ error: 'Transaction not found in spreadsheet.' },
-				{ status: 404 }
+				{ error: 'Transaction mismatch. The data may have changed. Please refresh and try again.' },
+				{ status: 409 }
 			);
 		}
 
@@ -289,7 +241,7 @@ export const DELETE: RequestHandler = async ({ request }) => {
 		});
 		const sheetId = spreadsheet.data.sheets?.[0]?.properties?.sheetId ?? 0;
 
-		// Delete the row
+		// Delete the row (rowNumber is 1-indexed, API uses 0-indexed)
 		await sheets.spreadsheets.batchUpdate({
 			spreadsheetId: GOOGLE_SHEETS_ID,
 			requestBody: {
@@ -298,8 +250,8 @@ export const DELETE: RequestHandler = async ({ request }) => {
 						range: {
 							sheetId: sheetId,
 							dimension: 'ROWS',
-							startIndex: rowIndexToDelete,
-							endIndex: rowIndexToDelete + 1
+							startIndex: rowNumber - 1,
+							endIndex: rowNumber
 						}
 					}
 				}]
@@ -331,7 +283,7 @@ export const PUT: RequestHandler = async ({ request }) => {
 			);
 		}
 
-		// Parse request body - contains original and updated transaction
+		// Parse request body - contains original (with rowNumber) and updated transaction
 		const body = await request.json();
 		const { original, updated } = body;
 
@@ -343,13 +295,13 @@ export const PUT: RequestHandler = async ({ request }) => {
 			);
 		}
 
-		const { owner: origOwner, description: origDesc, amount: origAmount, type: origType, date: origDate } = original;
+		const { rowNumber, description: origDesc } = original;
 		const { owner, description, amount, type, date } = updated;
 
-		// Validate original fields
-		if (!origOwner || !origDesc || origAmount === undefined || !origType || !origDate) {
+		// Validate original fields (only need rowNumber and description for identification)
+		if (!rowNumber || !origDesc) {
 			return json(
-				{ error: 'Missing required fields in original transaction' },
+				{ error: 'Missing required fields in original transaction: rowNumber, description' },
 				{ status: 400 }
 			);
 		}
@@ -407,76 +359,28 @@ export const PUT: RequestHandler = async ({ request }) => {
 
 		const sheets = google.sheets({ version: 'v4', auth });
 
-		// Fetch all data to find the row to update
+		// Fetch the specific row to verify it exists and matches
 		const response = await sheets.spreadsheets.values.get({
 			spreadsheetId: GOOGLE_SHEETS_ID,
-			range: 'A:E'
+			range: `A${rowNumber}:E${rowNumber}`
 		});
 
 		const rows = response.data.values;
-		if (!rows || rows.length < 2) {
+		if (!rows || rows.length === 0) {
 			return json(
-				{ error: 'No transactions found to update.' },
+				{ error: 'Transaction not found at specified row.' },
 				{ status: 404 }
 			);
 		}
 
-		// Parse the original transaction date for comparison
-		const txDate = new Date(origDate);
-		const txDay = txDate.getUTCDate();
-		const txMonth = txDate.getUTCMonth() + 1;
-		const txYear = txDate.getUTCFullYear();
+		const row = rows[0];
+		const rowDesc = row[1]; // Description is column B (index 1)
 
-		// Find the row index that matches (skip header row)
-		let rowIndexToUpdate = -1;
-		for (let i = 1; i < rows.length; i++) {
-			const row = rows[i];
-			if (!row || row.length < 5) continue;
-
-			const [rowOwner, rowDesc, rowAmount, rowType, rowDate] = row;
-
-			// Check owner and description match
-			if (rowOwner !== origOwner || rowDesc !== origDesc) continue;
-
-			// Check amount (parse the formatted amount)
-			const parsedAmount = parseFloat(
-				String(rowAmount)
-					.replace(/R\$\s*/g, '')
-					.replace(/\./g, '')
-					.replace(',', '.')
-			) || 0;
-			if (Math.abs(parsedAmount - origAmount) > 0.01) continue;
-
-			// Check date - parse various formats
-			let dateMatch = false;
-			const dateStr = String(rowDate);
-
-			// Try YYYY-MM-DD format
-			if (dateStr.includes('-')) {
-				const [y, m, d] = dateStr.split('-').map(Number);
-				dateMatch = d === txDay && m === txMonth && y === txYear;
-			}
-			// Try DD/MM/YY or DD/MM/YYYY format
-			else if (dateStr.includes('/')) {
-				const parts = dateStr.split('/').map(Number);
-				if (parts.length === 3) {
-					const [d, m, y] = parts;
-					const fullYear = y < 100 ? (y < 50 ? 2000 + y : 1900 + y) : y;
-					dateMatch = d === txDay && m === txMonth && fullYear === txYear;
-				}
-			}
-
-			if (!dateMatch) continue;
-
-			// Found a match
-			rowIndexToUpdate = i;
-			break;
-		}
-
-		if (rowIndexToUpdate === -1) {
+		// Sanity check: verify description matches
+		if (rowDesc !== origDesc) {
 			return json(
-				{ error: 'Transaction not found in spreadsheet.' },
-				{ status: 404 }
+				{ error: 'Transaction mismatch. The data may have changed. Please refresh and try again.' },
+				{ status: 409 }
 			);
 		}
 
@@ -490,10 +394,10 @@ export const PUT: RequestHandler = async ({ request }) => {
 		};
 		const rowData = transactionToSheetRow(transaction);
 
-		// Update the row (rowIndexToUpdate + 1 because Sheets is 1-indexed)
+		// Update the row using rowNumber directly (already 1-indexed)
 		await sheets.spreadsheets.values.update({
 			spreadsheetId: GOOGLE_SHEETS_ID,
-			range: `A${rowIndexToUpdate + 1}:E${rowIndexToUpdate + 1}`,
+			range: `A${rowNumber}:E${rowNumber}`,
 			valueInputOption: 'USER_ENTERED',
 			requestBody: {
 				values: [rowData]
@@ -504,6 +408,7 @@ export const PUT: RequestHandler = async ({ request }) => {
 			success: true,
 			transaction: {
 				...transaction,
+				rowNumber,
 				date: parsedDate.toISOString()
 			}
 		});

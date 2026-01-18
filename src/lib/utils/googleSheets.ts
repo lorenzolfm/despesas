@@ -136,6 +136,7 @@ export function parseSheetData(rows: string[][]): ParseResult {
 
 		transactions.push({
 			id: generateId(),
+			rowNumber: i + 1, // 1-indexed (row 1 is header, row 2 is first data = i=1)
 			owner: owner as Owner,
 			description,
 			amount,
