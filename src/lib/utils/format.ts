@@ -74,7 +74,7 @@ export function parseDateBR(dateStr: string): Date {
 		if (parts.length === 3 && parts.every((p) => !isNaN(p))) {
 			const [day, month, year] = parts;
 			const fullYear = year < 100 ? (year < 50 ? 2000 + year : 1900 + year) : year;
-			return new Date(fullYear, month - 1, day);
+			return new Date(fullYear, month - 1, day, 12, 0, 0);
 		}
 	}
 
@@ -83,15 +83,15 @@ export function parseDateBR(dateStr: string): Date {
 		const parts = trimmed.split('-').map(Number);
 		if (parts.length === 3 && parts.every((p) => !isNaN(p))) {
 			const [year, month, day] = parts;
-			return new Date(year, month - 1, day);
+			return new Date(year, month - 1, day, 12, 0, 0);
 		}
 	}
 
 	// Try parsing as serial number (Google Sheets stores dates as days since Dec 30, 1899)
 	const serialNum = parseFloat(trimmed);
 	if (!isNaN(serialNum) && serialNum > 1 && serialNum < 100000) {
-		// Google Sheets epoch is December 30, 1899
-		const sheetsEpoch = new Date(1899, 11, 30);
+		// Google Sheets epoch is December 30, 1899 at noon (to avoid timezone boundary issues)
+		const sheetsEpoch = new Date(1899, 11, 30, 12, 0, 0);
 		const date = new Date(sheetsEpoch.getTime() + serialNum * 24 * 60 * 60 * 1000);
 		if (!isNaN(date.getTime())) {
 			return date;
