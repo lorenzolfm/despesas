@@ -172,6 +172,7 @@
       type="button"
       onclick={() => showCalendar = !showCalendar}
       {disabled}
+      aria-label="Toggle calendar"
       class="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-themed-secondary hover:text-themed disabled:opacity-50"
     >
       <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -190,6 +191,7 @@
         <button
           type="button"
           onclick={prevMonth}
+          aria-label="Previous month"
           class="p-1 hover:bg-themed-tertiary rounded transition-colors"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-themed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -202,6 +204,7 @@
         <button
           type="button"
           onclick={nextMonth}
+          aria-label="Next month"
           class="p-1 hover:bg-themed-tertiary rounded transition-colors"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-themed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

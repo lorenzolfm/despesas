@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { untrack } from 'svelte';
 	import type { MonthKey } from '$lib/types';
 	import { EXPENSE_CATEGORIES } from '$lib/types';
 	import { useExpenses } from '$lib/stores/expenses.svelte';
@@ -31,8 +32,8 @@
 		allMonthlyTotals.filter((month) => compareMonthKeys(month.monthKey, currentMonthKey) <= 0)
 	);
 
-	// Selected month state - default to current month
-	let selectedMonthValue = $state<string>(monthKeyToString(currentMonthKey));
+	// Selected month state - default to current month (untrack to avoid reactive warning)
+	let selectedMonthValue = $state<string>(untrack(() => monthKeyToString(currentMonthKey)));
 
 	// Dropdown options from all months with data
 	const monthOptions = $derived(

@@ -282,6 +282,7 @@
 						type="button"
 						role="switch"
 						aria-checked={showFutureTransactions}
+						aria-label="Toggle future transactions"
 						onclick={() => showFutureTransactions = !showFutureTransactions}
 						class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors {showFutureTransactions ? 'bg-primary' : 'bg-themed-tertiary'}"
 					>
