@@ -9,3 +9,4 @@ export { default as ThemeToggle } from './ThemeToggle.svelte';
 export { default as DatePicker } from './DatePicker.svelte';
 export { default as LineChart } from './LineChart.svelte';
 export { default as PieChart } from './PieChart.svelte';
+export { default as SankeyChart } from './SankeyChart.svelte';

@@ -4,7 +4,8 @@
 	import { EXPENSE_CATEGORIES } from '$lib/types';
 	import { useExpenses } from '$lib/stores/expenses.svelte';
 	import { formatBRL, formatMonthYear, getMonthRange, formatDate, getMonthKey } from '$lib/utils/format';
-	import { Card, Avatar, Badge, Select, LineChart, PieChart } from '$lib/components/ui';
+	import { Card, Avatar, Badge, Select, LineChart, PieChart, SankeyChart } from '$lib/components/ui';
+	import { transformToSankeyData } from '$lib/utils/sankey';
 
 	const expenses = useExpenses();
 
@@ -354,6 +355,17 @@
 							{/if}
 						</div>
 					</div>
+
+					<!-- Income Flow Sankey -->
+					{@const sankeyData = transformToSankeyData(month)}
+					{#if sankeyData.links.length > 0}
+						<div class="mt-6 pt-6 border-t border-themed">
+							<h4 class="text-sm font-semibold text-themed-secondary uppercase tracking-wide mb-4">
+								Income Flow
+							</h4>
+							<SankeyChart data={sankeyData} height={300} />
+						</div>
+					{/if}
 				{/if}
 
 				<!-- Person Breakdown -->
