@@ -2,6 +2,7 @@ import { json } from '@sveltejs/kit';
 import type { RequestHandler } from './$types';
 import { google } from 'googleapis';
 import { parseSheetData, transactionToSheetRow } from '$lib/utils/googleSheets';
+import { addMonths } from '$lib/utils/format';
 import { env } from '$env/dynamic/private';
 
 export const GET: RequestHandler = async () => {
@@ -78,12 +79,20 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		// Parse request body
 		const body = await request.json();
-		const { owner, description, amount, type, date, category } = body;
+		const { owner, description, amount, type, date, category, installments = 1 } = body;
 
 		// Validate required fields (category is optional)
 		if (!owner || !description || amount === undefined || !type || !date) {
 			return json(
 				{ error: 'Missing required fields: owner, description, amount, type, date' },
+				{ status: 400 }
+			);
+		}
+
+		// Validate installments
+		if (!Number.isInteger(installments) || installments < 1 || installments > 48) {
+			return json(
+				{ error: 'Installments must be an integer between 1 and 48.' },
 				{ status: 400 }
 			);
 		}
@@ -133,36 +142,46 @@ export const POST: RequestHandler = async ({ request }) => {
 
 		const sheets = google.sheets({ version: 'v4', auth });
 
-		// Prepare the row data
-		const transaction = {
-			owner,
-			description,
-			amount,
-			type,
-			date: parsedDate,
-			category: category || undefined
-		};
-		const rowData = transactionToSheetRow(transaction);
+		// Generate transactions (one per installment)
+		const transactions = [];
+		for (let i = 0; i < installments; i++) {
+			const txDate = addMonths(parsedDate, i);
+			const txDescription =
+				installments > 1 ? `${description.trim()} ${i + 1}/${installments}` : description.trim();
 
-		// Append the row to the sheet
+			transactions.push({
+				owner,
+				description: txDescription,
+				amount,
+				type,
+				date: txDate,
+				category: category || undefined
+			});
+		}
+
+		// Convert all transactions to sheet rows
+		const rows = transactions.map((tx) => transactionToSheetRow(tx));
+
+		// Batch append all rows in a single API call
 		await sheets.spreadsheets.values.append({
 			spreadsheetId: GOOGLE_SHEETS_ID,
 			range: 'A:F',
 			valueInputOption: 'USER_ENTERED',
 			insertDataOption: 'INSERT_ROWS',
 			requestBody: {
-				values: [rowData]
+				values: rows
 			}
 		});
 
 		// Return success
 		return json({
 			success: true,
-			transaction: {
-				...transaction,
+			count: transactions.length,
+			transactions: transactions.map((tx) => ({
+				...tx,
 				id: crypto.randomUUID(),
-				date: parsedDate.toISOString()
-			}
+				date: tx.date.toISOString()
+			}))
 		});
 
 	} catch (error) {

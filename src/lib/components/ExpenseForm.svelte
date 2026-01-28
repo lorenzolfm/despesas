@@ -3,6 +3,7 @@
 	import { EXPENSE_TYPES, EXPENSE_CATEGORIES, OWNERS } from '$lib/types';
 	import { useExpenses } from '$lib/stores/expenses.svelte';
 	import { Card, Button, Input, Select, Avatar, DatePicker } from '$lib/components/ui';
+	import { addMonths, formatDate } from '$lib/utils/format';
 
 	interface Props {
 		onSuccess?: () => void;
@@ -18,10 +19,14 @@
 	let type = $state<ExpenseType>('Household');
 	let category = $state<ExpenseCategory | ''>('');
 	let date = $state(new Date());
+	let installments = $state(1);
 
 	let error = $state('');
 	let success = $state(false);
+	let successCount = $state(1);
 	let isSubmitting = $state(false);
+
+	const showInstallmentPreview = $derived(installments > 1);
 
 	const ownerOptions = OWNERS.map((o) => ({ value: o, label: o }));
 	const typeOptions = EXPENSE_TYPES.map((t) => ({ value: t, label: t }));
@@ -56,6 +61,13 @@
 			return;
 		}
 
+		const parsedInstallments = Math.floor(Number(installments) || 1);
+		if (parsedInstallments < 1 || parsedInstallments > 48) {
+			error = 'Installments must be between 1 and 48';
+			isSubmitting = false;
+			return;
+		}
+
 		try {
 			// Make API call to write to Google Sheets
 			const response = await fetch('/api/transactions', {
@@ -69,7 +81,8 @@
 					amount: parsedAmount,
 					type,
 					date: date.toISOString(),
-					category: category || undefined
+					category: category || undefined,
+					installments: parsedInstallments
 				})
 			});
 
@@ -84,6 +97,8 @@
 			amount = '';
 			category = '';
 			date = new Date();
+			installments = 1;
+			successCount = result.count || 1;
 			success = true;
 
 			// Refresh the transactions list from Google Sheets
@@ -132,7 +147,13 @@
 				<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
 				<polyline points="22 4 12 14.01 9 11.01"/>
 			</svg>
-			<span class="text-sm text-positive">Transaction added successfully!</span>
+			<span class="text-sm text-positive">
+				{#if successCount > 1}
+					{successCount} transactions added successfully!
+				{:else}
+					Transaction added successfully!
+				{/if}
+			</span>
 		</div>
 	{/if}
 
@@ -190,12 +211,33 @@
 			/>
 		</div>
 
-		<DatePicker
-			label="Date"
-			bind:value={date}
-			disabled={isSubmitting}
-			required
-		/>
+		<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+			<DatePicker
+				label="Date"
+				bind:value={date}
+				disabled={isSubmitting}
+				required
+			/>
+
+			<Input
+				type="number"
+				label="Installments"
+				bind:value={installments}
+				min="1"
+				max="48"
+				placeholder="1"
+			/>
+		</div>
+
+		{#if showInstallmentPreview}
+			<div class="p-3 rounded-lg bg-primary/5 border border-primary/20">
+				<p class="text-sm text-themed-secondary">
+					Will create <span class="font-medium text-themed">{installments}</span> transactions from
+					<span class="font-medium text-themed">{formatDate(date)}</span> to
+					<span class="font-medium text-themed">{formatDate(addMonths(date, installments - 1))}</span>
+				</p>
+			</div>
+		{/if}
 
 		<div class="pt-2">
 			<Button type="submit" fullWidth disabled={isSubmitting}>

@@ -205,3 +205,17 @@ export function groupTransactionsByDate<T extends { date: Date }>(
 
 	return groups;
 }
+
+/**
+ * Advances a date by N months, clamping to the last day of the month if needed.
+ * Example: Jan 31 + 1 month = Feb 28 (or 29 in leap year)
+ */
+export function addMonths(date: Date, months: number): Date {
+	const result = new Date(date);
+	const originalDay = result.getDate();
+	result.setDate(1);
+	result.setMonth(result.getMonth() + months);
+	const lastDayOfMonth = new Date(result.getFullYear(), result.getMonth() + 1, 0).getDate();
+	result.setDate(Math.min(originalDay, lastDayOfMonth));
+	return result;
+}
