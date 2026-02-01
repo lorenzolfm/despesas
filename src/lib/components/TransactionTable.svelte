@@ -3,7 +3,7 @@
 	import { formatBRL, formatRelativeDate, groupTransactionsByDate } from '$lib/utils/format';
 	import { Card, Avatar, Badge, Button, Input, Modal, Select, DatePicker } from '$lib/components/ui';
 	import type { ExpenseType, ExpenseCategory, Transaction, Owner } from '$lib/types';
-	import { EXPENSE_TYPES, EXPENSE_CATEGORIES, OWNERS } from '$lib/types';
+	import { EXPENSE_TYPES, EXPENSE_CATEGORIES, OWNERS, EXPENSE_TYPE_EMOJIS, EXPENSE_CATEGORY_EMOJIS } from '$lib/types';
 
 	interface Props {
 		onDelete?: () => void;
@@ -48,10 +48,10 @@
 		date: new Date()
 	});
 
-	const typeOptions = EXPENSE_TYPES.map((t) => ({ value: t, label: t }));
+	const typeOptions = EXPENSE_TYPES.map((t) => ({ value: t, label: `${EXPENSE_TYPE_EMOJIS[t]} ${t}` }));
 	const categoryOptions = [
 		{ value: '', label: 'No category' },
-		...EXPENSE_CATEGORIES.map((c) => ({ value: c, label: c }))
+		...EXPENSE_CATEGORIES.map((c) => ({ value: c, label: `${EXPENSE_CATEGORY_EMOJIS[c]} ${c}` }))
 	];
 
 	// Get today's date at midnight for comparison
@@ -345,11 +345,11 @@
 										{tx.description}
 									</span>
 									<Badge variant={getTypeBadgeVariant(tx.type)} size="sm">
-										{tx.type}
+										{EXPENSE_TYPE_EMOJIS[tx.type]} {tx.type}
 									</Badge>
 									{#if tx.category}
 										<Badge variant="default" size="sm">
-											{tx.category}
+											{EXPENSE_CATEGORY_EMOJIS[tx.category]} {tx.category}
 										</Badge>
 									{/if}
 								</div>

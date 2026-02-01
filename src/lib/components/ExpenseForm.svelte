@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { Owner, ExpenseType, ExpenseCategory } from '$lib/types';
-	import { EXPENSE_TYPES, EXPENSE_CATEGORIES, OWNERS } from '$lib/types';
+	import { EXPENSE_TYPES, EXPENSE_CATEGORIES, OWNERS, EXPENSE_TYPE_EMOJIS, EXPENSE_CATEGORY_EMOJIS } from '$lib/types';
 	import { useExpenses } from '$lib/stores/expenses.svelte';
-	import { Card, Button, Input, Select, Avatar, DatePicker } from '$lib/components/ui';
-	import { addMonths, formatDate } from '$lib/utils/format';
+	import { Card, Button, Input, Select, Avatar, DatePicker, Modal } from '$lib/components/ui';
+	import { addMonths, formatDate, formatBRL } from '$lib/utils/format';
 
 	interface Props {
 		onSuccess?: () => void;
@@ -25,48 +25,74 @@
 	let success = $state(false);
 	let successCount = $state(1);
 	let isSubmitting = $state(false);
+	let showConfirmModal = $state(false);
+
+	// Store validated form data for confirmation
+	let confirmData = $state<{
+		owner: Owner;
+		description: string;
+		amount: number;
+		type: ExpenseType;
+		date: Date;
+		category?: ExpenseCategory;
+		installments: number;
+	} | null>(null);
 
 	const showInstallmentPreview = $derived(installments > 1);
 
 	const ownerOptions = OWNERS.map((o) => ({ value: o, label: o }));
-	const typeOptions = EXPENSE_TYPES.map((t) => ({ value: t, label: t }));
+	const typeOptions = EXPENSE_TYPES.map((t) => ({ value: t, label: `${EXPENSE_TYPE_EMOJIS[t]} ${t}` }));
 	const categoryOptions = [
 		{ value: '', label: 'No category' },
-		...EXPENSE_CATEGORIES.map((c) => ({ value: c, label: c }))
+		...EXPENSE_CATEGORIES.map((c) => ({ value: c, label: `${EXPENSE_CATEGORY_EMOJIS[c]} ${c}` }))
 	];
 
-	async function handleSubmit(e: Event) {
+	function handleSubmit(e: Event) {
 		e.preventDefault();
 		error = '';
 		success = false;
-		isSubmitting = true;
 
 		// Validation
 		if (!description.trim()) {
 			error = 'Description is required';
-			isSubmitting = false;
 			return;
 		}
 
 		const parsedAmount = parseFloat(amount.replace(',', '.'));
 		if (isNaN(parsedAmount) || parsedAmount <= 0) {
 			error = 'Please enter a valid amount';
-			isSubmitting = false;
 			return;
 		}
 
 		if (!date || isNaN(date.getTime())) {
 			error = 'Please enter a valid date';
-			isSubmitting = false;
 			return;
 		}
 
 		const parsedInstallments = Math.floor(Number(installments) || 1);
 		if (parsedInstallments < 1 || parsedInstallments > 48) {
 			error = 'Installments must be between 1 and 48';
-			isSubmitting = false;
 			return;
 		}
+
+		// Store validated data and show confirmation modal
+		confirmData = {
+			owner,
+			description: description.trim(),
+			amount: parsedAmount,
+			type,
+			date,
+			category: category || undefined,
+			installments: parsedInstallments
+		};
+		showConfirmModal = true;
+	}
+
+	async function handleConfirm() {
+		if (!confirmData) return;
+
+		isSubmitting = true;
+		showConfirmModal = false;
 
 		try {
 			// Make API call to write to Google Sheets
@@ -76,13 +102,8 @@
 					'Content-Type': 'application/json'
 				},
 				body: JSON.stringify({
-					owner,
-					description: description.trim(),
-					amount: parsedAmount,
-					type,
-					date: date.toISOString(),
-					category: category || undefined,
-					installments: parsedInstallments
+					...confirmData,
+					date: confirmData.date.toISOString()
 				})
 			});
 
@@ -100,6 +121,7 @@
 			installments = 1;
 			successCount = result.count || 1;
 			success = true;
+			confirmData = null;
 
 			// Refresh the transactions list from Google Sheets
 			onSuccess?.();
@@ -113,6 +135,11 @@
 		} finally {
 			isSubmitting = false;
 		}
+	}
+
+	function handleCancelConfirm() {
+		showConfirmModal = false;
+		confirmData = null;
 	}
 </script>
 
@@ -258,3 +285,89 @@
 		</div>
 	</form>
 </Card>
+
+<!-- Confirmation Modal -->
+<Modal
+	bind:open={showConfirmModal}
+	title="Confirm Transaction"
+	onclose={handleCancelConfirm}
+	onconfirm={handleConfirm}
+	confirmText="Save to Spreadsheet"
+	cancelText="Cancel"
+	confirmVariant="success"
+	confirmDisabled={isSubmitting}
+>
+	{#if confirmData}
+		<div class="space-y-4">
+			<p class="text-sm text-themed-secondary mb-4">
+				Please review the transaction details before saving to the spreadsheet.
+			</p>
+
+			<div class="space-y-3">
+				<!-- Owner -->
+				<div class="flex items-center justify-between py-2 border-b border-themed">
+					<span class="text-sm font-medium text-themed-secondary">Owner</span>
+					<div class="flex items-center gap-2">
+						<Avatar name={confirmData.owner} size="sm" color={confirmData.owner === 'Lorenzo' ? 'lorenzo' : 'maria'} />
+						<span class="text-sm font-semibold text-themed">{confirmData.owner}</span>
+					</div>
+				</div>
+
+				<!-- Type -->
+				<div class="flex items-center justify-between py-2 border-b border-themed">
+					<span class="text-sm font-medium text-themed-secondary">Type</span>
+					<span class="text-sm font-semibold text-themed">{EXPENSE_TYPE_EMOJIS[confirmData.type]} {confirmData.type}</span>
+				</div>
+
+				<!-- Amount -->
+				<div class="flex items-center justify-between py-2 border-b border-themed">
+					<span class="text-sm font-medium text-themed-secondary">Amount</span>
+					<span class="text-lg font-bold text-primary">{formatBRL(confirmData.amount)}</span>
+				</div>
+
+				<!-- Description -->
+				<div class="flex items-center justify-between py-2 border-b border-themed">
+					<span class="text-sm font-medium text-themed-secondary">Description</span>
+					<span class="text-sm font-semibold text-themed text-right">{confirmData.description}</span>
+				</div>
+
+				<!-- Category -->
+				{#if confirmData.category}
+					<div class="flex items-center justify-between py-2 border-b border-themed">
+						<span class="text-sm font-medium text-themed-secondary">Category</span>
+						<span class="text-sm font-semibold text-themed">{EXPENSE_CATEGORY_EMOJIS[confirmData.category]} {confirmData.category}</span>
+					</div>
+				{/if}
+
+				<!-- Date -->
+				<div class="flex items-center justify-between py-2 border-b border-themed">
+					<span class="text-sm font-medium text-themed-secondary">Date</span>
+					<span class="text-sm font-semibold text-themed">{formatDate(confirmData.date)}</span>
+				</div>
+
+				<!-- Installments -->
+				{#if confirmData.installments > 1}
+					<div class="flex flex-col gap-1 py-2 border-b border-themed">
+						<div class="flex items-center justify-between">
+							<span class="text-sm font-medium text-themed-secondary">Installments</span>
+							<span class="text-sm font-semibold text-themed">{confirmData.installments}x</span>
+						</div>
+						<p class="text-xs text-themed-secondary mt-1">
+							From {formatDate(confirmData.date)} to {formatDate(addMonths(confirmData.date, confirmData.installments - 1))}
+						</p>
+					</div>
+				{/if}
+			</div>
+
+			<!-- Total summary for installments -->
+			{#if confirmData.installments > 1}
+				<div class="mt-4 p-3 rounded-lg bg-primary/5 border border-primary/20">
+					<p class="text-sm text-themed-secondary">
+						This will create <span class="font-semibold text-themed">{confirmData.installments}</span> transactions,
+						totaling <span class="font-semibold text-primary">{formatBRL(confirmData.amount * confirmData.installments)}</span>
+					</p>
+				</div>
+			{/if}
+		</div>
+	{/if}
+</Modal>

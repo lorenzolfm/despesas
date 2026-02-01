@@ -46,6 +46,32 @@ export const EXPENSE_CATEGORIES: ExpenseCategory[] = [
 	'Subscription'
 ];
 
+// Emoji mappings for expense types
+export const EXPENSE_TYPE_EMOJIS: Record<ExpenseType, string> = {
+	'Income': '💰',
+	'Household': '🏠',
+	'Split 50/50': '🤝',
+	'Personal': '👤',
+	'Paid for Partner': '💝',
+	'Credit': '💳',
+	'Settlement': '⚖️'
+};
+
+// Emoji mappings for expense categories
+export const EXPENSE_CATEGORY_EMOJIS: Record<ExpenseCategory, string> = {
+	'Mercado': '🛒',
+	'Transporte': '🚗',
+	'Água': '💧',
+	'Luz': '💡',
+	'Comida boa': '🍽️',
+	'Filho': '👶',
+	'Entreterimento': '🎮',
+	'Saúde': '❤️‍🩹',
+	'Casa': '🏡',
+	'Educação': '📚',
+	'Subscription': '📱'
+};
+
 export const OWNERS: Owner[] = ['Lorenzo', 'Maria'];
 
 export interface Transaction {

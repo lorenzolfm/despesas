@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { untrack } from 'svelte';
-	import type { MonthKey } from '$lib/types';
-	import { EXPENSE_CATEGORIES } from '$lib/types';
+	import type { MonthKey, ExpenseCategory } from '$lib/types';
+	import { EXPENSE_CATEGORIES, EXPENSE_CATEGORY_EMOJIS } from '$lib/types';
 	import { useExpenses } from '$lib/stores/expenses.svelte';
 	import { formatBRL, formatMonthYear, getMonthRange, formatDate, getMonthKey } from '$lib/utils/format';
 	import { Card, Avatar, Badge, Select, LineChart, PieChart, SankeyChart } from '$lib/components/ui';
@@ -221,7 +221,7 @@
 			{@const allTimePieData = Object.entries(aggregatedCategoryTotals)
 				.filter(([_, amount]) => amount > 0)
 				.map(([category, amount]) => ({
-					label: category,
+					label: `${EXPENSE_CATEGORY_EMOJIS[category as ExpenseCategory]} ${category}`,
 					value: amount,
 					color: categoryColors[category] || '#6b7280'
 				}))}
@@ -235,7 +235,7 @@
 								<div class="p-2 rounded-lg border border-themed flex items-center gap-2">
 									<div class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {categoryColors[cat]}"></div>
 									<div class="min-w-0">
-										<p class="text-xs text-themed-secondary truncate">{cat}</p>
+										<p class="text-xs text-themed-secondary truncate">{EXPENSE_CATEGORY_EMOJIS[cat]} {cat}</p>
 										<p class="text-sm font-bold font-mono text-themed">{formatBRL(amount)}</p>
 									</div>
 								</div>
@@ -327,7 +327,7 @@
 					{@const pieData = Object.entries(month.categoryTotals)
 						.filter(([_, amount]) => amount > 0)
 						.map(([category, amount]) => ({
-							label: category,
+							label: `${EXPENSE_CATEGORY_EMOJIS[category as ExpenseCategory]} ${category}`,
 							value: amount,
 							color: categoryColors[category] || '#6b7280'
 						}))}
@@ -341,7 +341,7 @@
 										<div class="p-2 rounded-lg border border-themed flex items-center gap-2">
 											<div class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {categoryColors[cat]}"></div>
 											<div class="min-w-0">
-												<p class="text-xs text-themed-secondary truncate">{cat}</p>
+												<p class="text-xs text-themed-secondary truncate">{EXPENSE_CATEGORY_EMOJIS[cat]} {cat}</p>
 												<p class="text-sm font-bold font-mono text-themed">{formatBRL(amount)}</p>
 											</div>
 										</div>
