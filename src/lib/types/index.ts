@@ -28,7 +28,9 @@ export type ExpenseCategory =
 	| 'Filho'
 	| 'Entreterimento'
 	| 'Saúde'
-	| 'Casa';
+	| 'Casa'
+	| 'Educação'
+	| 'Subscription';
 
 export const EXPENSE_CATEGORIES: ExpenseCategory[] = [
 	'Mercado',
@@ -39,7 +41,9 @@ export const EXPENSE_CATEGORIES: ExpenseCategory[] = [
 	'Filho',
 	'Entreterimento',
 	'Saúde',
-	'Casa'
+	'Casa',
+	'Educação',
+	'Subscription'
 ];
 
 export const OWNERS: Owner[] = ['Lorenzo', 'Maria'];
