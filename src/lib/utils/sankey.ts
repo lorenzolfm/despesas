@@ -1,4 +1,4 @@
-import type { CombinedMonthlyTotals } from '$lib/types';
+import type { CombinedMonthlyTotals, PersonMonthlyTotals } from '$lib/types';
 
 export interface SankeyNode {
 	id: string;
@@ -63,6 +63,57 @@ export function transformToSankeyData(monthData: CombinedMonthlyTotals): SankeyD
 	// Calculate uncategorized expenses (grandTotal minus categorized)
 	const totalCategorized = Object.values(monthData.categoryTotals).reduce((a, b) => a + b, 0);
 	const uncategorized = monthData.grandTotal - totalCategorized;
+
+	if (uncategorized > 0) {
+		nodes.push({
+			id: 'uncategorized',
+			name: 'Other',
+			color: '#9ca3af'
+		});
+		links.push({
+			source: 'income',
+			target: 'uncategorized',
+			value: uncategorized
+		});
+	}
+
+	// Sort links by value descending for better visual hierarchy
+	links.sort((a, b) => b.value - a.value);
+
+	return { nodes, links };
+}
+
+export function transformPersonToSankeyData(personData: PersonMonthlyTotals): SankeyData {
+	const nodes: SankeyNode[] = [];
+	const links: SankeyLink[] = [];
+
+	// Single income source node
+	nodes.push({
+		id: 'income',
+		name: 'Income',
+		color: '#22c55e'
+	});
+
+	// Add category nodes and links for categories with values > 0
+	for (const [category, amount] of Object.entries(personData.categoryTotals)) {
+		if (amount > 0) {
+			nodes.push({
+				id: `cat-${category}`,
+				name: category,
+				color: categoryColors[category] || '#6b7280'
+			});
+
+			links.push({
+				source: 'income',
+				target: `cat-${category}`,
+				value: amount
+			});
+		}
+	}
+
+	// Calculate uncategorized expenses (total minus categorized)
+	const totalCategorized = Object.values(personData.categoryTotals).reduce((a, b) => a + b, 0);
+	const uncategorized = personData.total - totalCategorized;
 
 	if (uncategorized > 0) {
 		nodes.push({

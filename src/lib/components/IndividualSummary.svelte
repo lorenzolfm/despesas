@@ -5,7 +5,7 @@
 	import { useExpenses } from '$lib/stores/expenses.svelte';
 	import { formatBRL, formatMonthYear, formatPercent, getMonthRange, formatDate, getMonthKey } from '$lib/utils/format';
 	import { Card, Avatar, Badge, Select, LineChart, PieChart, SankeyChart } from '$lib/components/ui';
-	import { transformToSankeyData } from '$lib/utils/sankey';
+	import { transformPersonToSankeyData } from '$lib/utils/sankey';
 
 	interface Props {
 		owner: Owner;
@@ -64,11 +64,6 @@
 	// Get selected month data
 	const selectedMonthData = $derived(
 		allPersonTotals.find((p) => monthKeyToString(p.monthKey) === selectedMonthValue)
-	);
-
-	// Get full combined month data for Sankey chart
-	const selectedCombinedMonthData = $derived(
-		expenses.monthlyTotals.find((m) => monthKeyToString(m.monthKey) === selectedMonthValue)
 	);
 
 	// Calculate aggregated totals across all months up to current
@@ -532,16 +527,14 @@
 					</div>
 
 					<!-- Income Flow Sankey -->
-					{#if selectedCombinedMonthData}
-						{@const sankeyData = transformToSankeyData(selectedCombinedMonthData)}
-						{#if sankeyData.links.length > 0}
-							<div class="mt-6 pt-6 border-t border-themed">
-								<h4 class="text-sm font-semibold text-themed-secondary uppercase tracking-wide mb-4">
-									Income Flow
-								</h4>
-								<SankeyChart data={sankeyData} height={300} />
-							</div>
-						{/if}
+					{@const sankeyData = transformPersonToSankeyData(person)}
+					{#if sankeyData.links.length > 0}
+						<div class="mt-6 pt-6 border-t border-themed">
+							<h4 class="text-sm font-semibold text-themed-secondary uppercase tracking-wide mb-4">
+								Income Flow
+							</h4>
+							<SankeyChart data={sankeyData} height={300} />
+						</div>
 					{/if}
 				{/if}
 
