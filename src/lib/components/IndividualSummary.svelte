@@ -4,7 +4,8 @@
 	import { EXPENSE_CATEGORIES, EXPENSE_CATEGORY_EMOJIS } from '$lib/types';
 	import { useExpenses } from '$lib/stores/expenses.svelte';
 	import { formatBRL, formatMonthYear, formatPercent, getMonthRange, formatDate, getMonthKey } from '$lib/utils/format';
-	import { Card, Avatar, Badge, Select, LineChart, PieChart } from '$lib/components/ui';
+	import { Card, Avatar, Badge, Select, LineChart, PieChart, SankeyChart } from '$lib/components/ui';
+	import { transformToSankeyData } from '$lib/utils/sankey';
 
 	interface Props {
 		owner: Owner;
@@ -65,6 +66,11 @@
 		allPersonTotals.find((p) => monthKeyToString(p.monthKey) === selectedMonthValue)
 	);
 
+	// Get full combined month data for Sankey chart
+	const selectedCombinedMonthData = $derived(
+		expenses.monthlyTotals.find((m) => monthKeyToString(m.monthKey) === selectedMonthValue)
+	);
+
 	// Calculate aggregated totals across all months up to current
 	const aggregatedTotals = $derived.by(() => {
 		const income = personTotalsUpToCurrent.reduce((sum, p) => sum + p.income, 0);
@@ -92,17 +98,19 @@
 		return totals;
 	});
 
-	// Category colors for charts
+	// Category colors for charts - unique color for each category
 	const categoryColors: Record<string, string> = {
-		'Mercado': '#22c55e',
-		'Transporte': '#3b82f6',
-		'Água': '#06b6d4',
-		'Luz': '#f59e0b',
-		'Comida boa': '#ec4899',
-		'Filho': '#8b5cf6',
-		'Entreterimento': '#f97316',
-		'Saúde': '#ef4444',
-		'Casa': '#6b7280'
+		'Mercado': '#10b981',        // emerald
+		'Transporte': '#3b82f6',     // blue
+		'Água': '#06b6d4',           // cyan
+		'Luz': '#fbbf24',            // yellow
+		'Comida boa': '#ec4899',     // pink
+		'Filho': '#8b5cf6',          // violet
+		'Entreterimento': '#f97316', // orange
+		'Saúde': '#ef4444',          // red
+		'Casa': '#6366f1',           // indigo
+		'Educação': '#14b8a6',       // teal
+		'Subscription': '#a855f7'    // purple
 	};
 
 	// Categories for chart selection
@@ -522,6 +530,19 @@
 							{/if}
 						</div>
 					</div>
+
+					<!-- Income Flow Sankey -->
+					{#if selectedCombinedMonthData}
+						{@const sankeyData = transformToSankeyData(selectedCombinedMonthData)}
+						{#if sankeyData.links.length > 0}
+							<div class="mt-6 pt-6 border-t border-themed">
+								<h4 class="text-sm font-semibold text-themed-secondary uppercase tracking-wide mb-4">
+									Income Flow
+								</h4>
+								<SankeyChart data={sankeyData} height={300} />
+							</div>
+						{/if}
+					{/if}
 				{/if}
 
 				<!-- Debt Result -->

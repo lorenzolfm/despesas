@@ -90,17 +90,19 @@
 		return totals;
 	});
 
-	// Category colors for charts
+	// Category colors for charts - unique color for each category
 	const categoryColors: Record<string, string> = {
-		'Mercado': '#22c55e',
-		'Transporte': '#3b82f6',
-		'Água': '#06b6d4',
-		'Luz': '#f59e0b',
-		'Comida boa': '#ec4899',
-		'Filho': '#8b5cf6',
-		'Entreterimento': '#f97316',
-		'Saúde': '#ef4444',
-		'Casa': '#6b7280'
+		'Mercado': '#10b981',        // emerald
+		'Transporte': '#3b82f6',     // blue
+		'Água': '#06b6d4',           // cyan
+		'Luz': '#fbbf24',            // yellow
+		'Comida boa': '#ec4899',     // pink
+		'Filho': '#8b5cf6',          // violet
+		'Entreterimento': '#f97316', // orange
+		'Saúde': '#ef4444',          // red
+		'Casa': '#6366f1',           // indigo
+		'Educação': '#14b8a6',       // teal
+		'Subscription': '#a855f7'    // purple
 	};
 
 	// Expense categories for breakdown
