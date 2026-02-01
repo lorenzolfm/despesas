@@ -16,6 +16,11 @@
 
 	let searchInput = $state('');
 	let showFutureTransactions = $state(false);
+
+	// Filter states
+	let filterType = $state<ExpenseType | 'all'>('all');
+	let filterCategory = $state<ExpenseCategory | 'all'>('all');
+	let filterOwner = $state<Owner | 'all'>('all');
 	let deleteModal = $state<{ open: boolean; transaction: Transaction | null; isDeleting: boolean; error: string }>({
 		open: false,
 		transaction: null,
@@ -48,22 +53,56 @@
 		date: new Date()
 	});
 
+	// Options for edit modal
 	const typeOptions = EXPENSE_TYPES.map((t) => ({ value: t, label: `${EXPENSE_TYPE_EMOJIS[t]} ${t}` }));
 	const categoryOptions = [
 		{ value: '', label: 'No category' },
 		...EXPENSE_CATEGORIES.map((c) => ({ value: c, label: `${EXPENSE_CATEGORY_EMOJIS[c]} ${c}` }))
 	];
 
+	// Options for filters
+	const filterTypeOptions = [
+		{ value: 'all', label: 'All Types' },
+		...EXPENSE_TYPES.map((t) => ({ value: t, label: `${EXPENSE_TYPE_EMOJIS[t]} ${t}` }))
+	];
+	const filterCategoryOptions = [
+		{ value: 'all', label: 'All Categories' },
+		...EXPENSE_CATEGORIES.map((c) => ({ value: c, label: `${EXPENSE_CATEGORY_EMOJIS[c]} ${c}` }))
+	];
+	const filterOwnerOptions = [
+		{ value: 'all', label: 'All Owners' },
+		...OWNERS.map((o) => ({ value: o, label: o }))
+	];
+
 	// Get today's date at midnight for comparison
 	const today = new Date();
 	today.setHours(23, 59, 59, 999);
 
-	// Filter out future transactions unless toggle is on
+	// Apply all filters to transactions
 	const visibleTransactions = $derived(() => {
-		if (showFutureTransactions) {
-			return expenses.filteredTransactions;
+		let filtered = expenses.filteredTransactions;
+
+		// Filter by future transactions
+		if (!showFutureTransactions) {
+			filtered = filtered.filter(tx => tx.date <= today);
 		}
-		return expenses.filteredTransactions.filter(tx => tx.date <= today);
+
+		// Filter by type
+		if (filterType !== 'all') {
+			filtered = filtered.filter(tx => tx.type === filterType);
+		}
+
+		// Filter by category
+		if (filterCategory !== 'all') {
+			filtered = filtered.filter(tx => tx.category === filterCategory);
+		}
+
+		// Filter by owner
+		if (filterOwner !== 'all') {
+			filtered = filtered.filter(tx => tx.owner === filterOwner);
+		}
+
+		return filtered;
 	});
 
 	const futureTransactionsCount = $derived(() => {
@@ -78,6 +117,16 @@
 		searchInput = '';
 		expenses.setSearchQuery('');
 	}
+
+	function clearFilters() {
+		filterType = 'all';
+		filterCategory = 'all';
+		filterOwner = 'all';
+	}
+
+	const hasActiveFilters = $derived(
+		filterType !== 'all' || filterCategory !== 'all' || filterOwner !== 'all'
+	);
 
 	function openDeleteModal(tx: Transaction) {
 		deleteModal = { open: true, transaction: tx, isDeleting: false, error: '' };
@@ -268,11 +317,43 @@
 				</Button>
 			{/if}
 		</div>
-		<div class="flex items-center justify-between mt-2">
-			<p class="text-sm text-themed-secondary">
-				{visibleTransactions().length} transaction{visibleTransactions().length !== 1 ? 's' : ''}
-				{expenses.searchQuery ? `matching "${expenses.searchQuery}"` : ''}
-			</p>
+
+		<!-- Filters -->
+		<div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+			<Select
+				label="Type"
+				bind:value={filterType}
+				options={filterTypeOptions}
+			/>
+			<Select
+				label="Category"
+				bind:value={filterCategory}
+				options={filterCategoryOptions}
+			/>
+			<Select
+				label="Owner"
+				bind:value={filterOwner}
+				options={filterOwnerOptions}
+			/>
+		</div>
+
+		<!-- Stats and Controls -->
+		<div class="flex items-center justify-between mt-3">
+			<div class="flex items-center gap-3">
+				<p class="text-sm text-themed-secondary">
+					{visibleTransactions().length} transaction{visibleTransactions().length !== 1 ? 's' : ''}
+					{expenses.searchQuery ? `matching "${expenses.searchQuery}"` : ''}
+				</p>
+				{#if hasActiveFilters}
+					<Button variant="ghost" size="sm" onclick={clearFilters}>
+						<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<line x1="18" y1="6" x2="6" y2="18"/>
+							<line x1="6" y1="6" x2="18" y2="18"/>
+						</svg>
+						Clear Filters
+					</Button>
+				{/if}
+			</div>
 			{#if futureTransactionsCount() > 0 || showFutureTransactions}
 				<label class="flex items-center gap-2 cursor-pointer">
 					<span class="text-sm text-themed-secondary">
