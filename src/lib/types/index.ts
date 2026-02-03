@@ -30,7 +30,8 @@ export type ExpenseCategory =
 	| 'Saúde'
 	| 'Casa'
 	| 'Educação'
-	| 'Subscription';
+	| 'Subscription'
+	| 'Investimento';
 
 export const EXPENSE_CATEGORIES: ExpenseCategory[] = [
 	'Mercado',
@@ -43,7 +44,8 @@ export const EXPENSE_CATEGORIES: ExpenseCategory[] = [
 	'Saúde',
 	'Casa',
 	'Educação',
-	'Subscription'
+	'Subscription',
+	'Investimento'
 ];
 
 // Emoji mappings for expense types
@@ -69,7 +71,8 @@ export const EXPENSE_CATEGORY_EMOJIS: Record<ExpenseCategory, string> = {
 	'Saúde': '❤️‍🩹',
 	'Casa': '🏡',
 	'Educação': '📚',
-	'Subscription': '📱'
+	'Subscription': '📱',
+	'Investimento': '📈'
 };
 
 export const OWNERS: Owner[] = ['Lorenzo', 'Maria'];
