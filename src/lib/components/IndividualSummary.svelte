@@ -153,77 +153,77 @@
 		<div class="flex items-center gap-4 mb-6">
 			<Avatar name={owner} size="xl" color={ownerColor} />
 			<div class="flex-1">
-				<h2 class="text-2xl font-bold text-themed">{owner}'s Summary</h2>
-				<p class="text-themed-secondary">Personal breakdown and debt calculation</p>
+				<h2 class="text-xl font-semibold text-themed">{owner}'s Summary</h2>
+				<p class="text-sm text-themed-secondary">Personal breakdown and debt calculation</p>
 			</div>
 			{#if aggregatedTotals.debt !== 0}
 				<div class="text-right">
-					<p class="text-sm text-themed-secondary mb-1">Overall Balance</p>
-					<p class="text-xl font-bold font-mono {aggregatedTotals.debt > 0 ? 'text-negative' : 'text-positive'}">
+					<p class="text-xs text-themed-tertiary mb-0.5">Overall Balance</p>
+					<p class="text-lg font-semibold font-mono {aggregatedTotals.debt > 0 ? 'text-negative' : 'text-positive'}">
 						{aggregatedTotals.debt > 0 ? 'Owes' : 'Owed'} {formatBRL(Math.abs(aggregatedTotals.debt))}
 					</p>
 				</div>
 			{/if}
 		</div>
 
-		<!-- Aggregated Stats Grid (Clickable) -->
-		<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
+		<!-- Aggregated Stats Grid (Clickable) — max 4 per row -->
+		<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
 			<button
 				type="button"
 				onclick={() => selectedChartCategory = 'income'}
-				class="p-4 rounded-lg bg-positive/10 text-left transition-all {selectedChartCategory === 'income' ? 'ring-2 ring-offset-2 ring-offset-themed ring-[#22c55e]' : 'hover:opacity-80'}"
+				class="p-3 rounded-lg bg-positive/10 text-left transition-all cursor-pointer {selectedChartCategory === 'income' ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed ring-[#22c55e]' : 'hover:opacity-80'}"
 			>
 				<p class="text-xs font-medium text-themed-secondary mb-1">Total Income</p>
-				<p class="text-lg font-bold font-mono text-positive">{formatBRL(aggregatedTotals.income)}</p>
+				<p class="text-base font-semibold font-mono text-positive">{formatBRL(aggregatedTotals.income)}</p>
 			</button>
 			<button
 				type="button"
 				onclick={() => selectedChartCategory = 'credit'}
-				class="p-4 rounded-lg bg-info/10 text-left transition-all {selectedChartCategory === 'credit' ? 'ring-2 ring-offset-2 ring-offset-themed ring-[#3b82f6]' : 'hover:opacity-80'}"
+				class="p-3 rounded-lg bg-info/10 text-left transition-all cursor-pointer {selectedChartCategory === 'credit' ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed ring-[#3b82f6]' : 'hover:opacity-80'}"
 			>
 				<p class="text-xs font-medium text-themed-secondary mb-1">Total Credit</p>
-				<p class="text-lg font-bold font-mono text-info">{formatBRL(aggregatedTotals.credit)}</p>
+				<p class="text-base font-semibold font-mono text-info">{formatBRL(aggregatedTotals.credit)}</p>
 			</button>
 			<button
 				type="button"
 				onclick={() => selectedChartCategory = 'revenue'}
-				class="p-4 rounded-lg bg-primary/10 text-left transition-all {selectedChartCategory === 'revenue' ? 'ring-2 ring-offset-2 ring-offset-themed ring-[#6366f1]' : 'hover:opacity-80'}"
+				class="p-3 rounded-lg bg-primary/10 text-left transition-all cursor-pointer {selectedChartCategory === 'revenue' ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed ring-[#6366f1]' : 'hover:opacity-80'}"
 			>
 				<p class="text-xs font-medium text-themed-secondary mb-1">Total Revenue</p>
-				<p class="text-lg font-bold font-mono text-primary">{formatBRL(aggregatedTotals.revenue)}</p>
+				<p class="text-base font-semibold font-mono text-primary">{formatBRL(aggregatedTotals.revenue)}</p>
 			</button>
 			<button
 				type="button"
 				onclick={() => selectedChartCategory = 'total'}
-				class="p-4 rounded-lg bg-themed-tertiary text-left transition-all {selectedChartCategory === 'total' ? 'ring-2 ring-offset-2 ring-offset-themed ring-[#6b7280]' : 'hover:opacity-80'}"
+				class="p-3 rounded-lg bg-themed-tertiary text-left transition-all cursor-pointer {selectedChartCategory === 'total' ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed ring-[#6b7280]' : 'hover:opacity-80'}"
 			>
 				<p class="text-xs font-medium text-themed-secondary mb-1">Total Paid</p>
-				<p class="text-lg font-bold font-mono text-themed">{formatBRL(aggregatedTotals.total)}</p>
+				<p class="text-base font-semibold font-mono text-themed">{formatBRL(aggregatedTotals.total)}</p>
 			</button>
 			<button
 				type="button"
 				onclick={() => selectedChartCategory = 'realSpending'}
-				class="p-4 rounded-lg bg-warning/10 text-left transition-all {selectedChartCategory === 'realSpending' ? 'ring-2 ring-offset-2 ring-offset-themed ring-[#f59e0b]' : 'hover:opacity-80'}"
+				class="p-3 rounded-lg bg-warning/10 text-left transition-all cursor-pointer {selectedChartCategory === 'realSpending' ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed ring-[#f59e0b]' : 'hover:opacity-80'}"
 			>
 				<p class="text-xs font-medium text-themed-secondary mb-1">Real Spending</p>
-				<p class="text-lg font-bold font-mono text-warning">{formatBRL(aggregatedTotals.realSpending)}</p>
+				<p class="text-base font-semibold font-mono text-warning">{formatBRL(aggregatedTotals.realSpending)}</p>
 			</button>
-			<div class="p-4 rounded-lg {aggregatedTotals.debt > 0 ? 'bg-negative/10' : aggregatedTotals.debt < 0 ? 'bg-positive/10' : 'bg-themed-tertiary'}">
+			<div class="p-3 rounded-lg {aggregatedTotals.debt > 0 ? 'bg-negative/10' : aggregatedTotals.debt < 0 ? 'bg-positive/10' : 'bg-themed-tertiary'}">
 				<p class="text-xs font-medium text-themed-secondary mb-1">Balance</p>
-				<p class="text-lg font-bold font-mono {aggregatedTotals.debt > 0 ? 'text-negative' : aggregatedTotals.debt < 0 ? 'text-positive' : 'text-themed'}">
+				<p class="text-base font-semibold font-mono {aggregatedTotals.debt > 0 ? 'text-negative' : aggregatedTotals.debt < 0 ? 'text-positive' : 'text-themed'}">
 					{aggregatedTotals.debt > 0 ? '-' : aggregatedTotals.debt < 0 ? '+' : ''}{formatBRL(Math.abs(aggregatedTotals.debt))}
 				</p>
 			</div>
 		</div>
 
 		<!-- All-Time Expense Categories (Clickable) -->
-		<div class="mt-6 pt-6 border-t border-themed">
+		<div class="mt-6 pt-6 border-t border-themed-light">
 			<h4 class="text-sm font-semibold text-themed-secondary uppercase tracking-wide mb-4">All-Time by Category</h4>
-			<div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
+			<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
 				<button
 					type="button"
 					onclick={() => selectedChartCategory = 'split5050Paid'}
-					class="p-3 rounded-lg border border-themed text-left transition-all {selectedChartCategory === 'split5050Paid' ? 'ring-2 ring-offset-2 ring-offset-themed ring-[#f59e0b]' : 'hover:opacity-80'}"
+					class="p-3 rounded-lg border border-themed-light text-left transition-all cursor-pointer {selectedChartCategory === 'split5050Paid' ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed ring-[#f59e0b]' : 'hover:opacity-80'}"
 				>
 					<div class="flex items-center gap-2 mb-2">
 						<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -232,12 +232,12 @@
 						</svg>
 						<p class="text-xs font-medium text-themed-secondary">50/50</p>
 					</div>
-					<p class="text-base font-bold font-mono text-themed">{formatBRL(aggregatedTotals.split5050Paid)}</p>
+					<p class="text-sm font-semibold font-mono text-themed">{formatBRL(aggregatedTotals.split5050Paid)}</p>
 				</button>
 				<button
 					type="button"
 					onclick={() => selectedChartCategory = 'householdPaid'}
-					class="p-3 rounded-lg border border-themed text-left transition-all {selectedChartCategory === 'householdPaid' ? 'ring-2 ring-offset-2 ring-offset-themed ring-[#8b5cf6]' : 'hover:opacity-80'}"
+					class="p-3 rounded-lg border border-themed-light text-left transition-all cursor-pointer {selectedChartCategory === 'householdPaid' ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed ring-[#8b5cf6]' : 'hover:opacity-80'}"
 				>
 					<div class="flex items-center gap-2 mb-2">
 						<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-utilities" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -246,12 +246,12 @@
 						</svg>
 						<p class="text-xs font-medium text-themed-secondary">Household</p>
 					</div>
-					<p class="text-base font-bold font-mono text-themed">{formatBRL(aggregatedTotals.householdPaid)}</p>
+					<p class="text-sm font-semibold font-mono text-themed">{formatBRL(aggregatedTotals.householdPaid)}</p>
 				</button>
 				<button
 					type="button"
 					onclick={() => selectedChartCategory = 'paidForPartner'}
-					class="p-3 rounded-lg border border-themed text-left transition-all {selectedChartCategory === 'paidForPartner' ? 'ring-2 ring-offset-2 ring-offset-themed ring-[#ec4899]' : 'hover:opacity-80'}"
+					class="p-3 rounded-lg border border-themed-light text-left transition-all cursor-pointer {selectedChartCategory === 'paidForPartner' ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed ring-[#ec4899]' : 'hover:opacity-80'}"
 				>
 					<div class="flex items-center gap-2 mb-2">
 						<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-maria" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -259,12 +259,12 @@
 						</svg>
 						<p class="text-xs font-medium text-themed-secondary">Paid for {partnerName}</p>
 					</div>
-					<p class="text-base font-bold font-mono text-themed">{formatBRL(aggregatedTotals.paidForPartner)}</p>
+					<p class="text-sm font-semibold font-mono text-themed">{formatBRL(aggregatedTotals.paidForPartner)}</p>
 				</button>
 				<button
 					type="button"
 					onclick={() => selectedChartCategory = 'personal'}
-					class="p-3 rounded-lg border border-themed text-left transition-all {selectedChartCategory === 'personal' ? 'ring-2 ring-offset-2 ring-offset-themed ring-[#6b7280]' : 'hover:opacity-80'}"
+					class="p-3 rounded-lg border border-themed-light text-left transition-all cursor-pointer {selectedChartCategory === 'personal' ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed ring-[#6b7280]' : 'hover:opacity-80'}"
 				>
 					<div class="flex items-center gap-2 mb-2">
 						<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-themed-secondary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -273,12 +273,12 @@
 						</svg>
 						<p class="text-xs font-medium text-themed-secondary">Personal</p>
 					</div>
-					<p class="text-base font-bold font-mono text-themed">{formatBRL(aggregatedTotals.personal)}</p>
+					<p class="text-sm font-semibold font-mono text-themed">{formatBRL(aggregatedTotals.personal)}</p>
 				</button>
 				<button
 					type="button"
 					onclick={() => selectedChartCategory = 'settlement'}
-					class="p-3 rounded-lg border border-themed text-left transition-all {selectedChartCategory === 'settlement' ? 'ring-2 ring-offset-2 ring-offset-themed ring-[#ef4444]' : 'hover:opacity-80'}"
+					class="p-3 rounded-lg border border-themed-light text-left transition-all cursor-pointer {selectedChartCategory === 'settlement' ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed ring-[#ef4444]' : 'hover:opacity-80'}"
 				>
 					<div class="flex items-center gap-2 mb-2">
 						<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-rent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -287,7 +287,7 @@
 						</svg>
 						<p class="text-xs font-medium text-themed-secondary">Settlement</p>
 					</div>
-					<p class="text-base font-bold font-mono text-rent">{formatBRL(aggregatedTotals.settlement)}</p>
+					<p class="text-sm font-semibold font-mono text-rent">{formatBRL(aggregatedTotals.settlement)}</p>
 				</button>
 			</div>
 		</div>
@@ -301,18 +301,18 @@
 					value: amount,
 					color: categoryColors[category] || '#6b7280'
 				}))}
-			<div class="mt-6 pt-6 border-t border-themed">
+			<div class="mt-6 pt-6 border-t border-themed-light">
 				<h4 class="text-sm font-semibold text-themed-secondary uppercase tracking-wide mb-4">By Expense Category (All Time)</h4>
 				<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
 					<div class="grid grid-cols-2 gap-2">
 						{#each EXPENSE_CATEGORIES as cat}
 							{@const amount = aggregatedCategoryTotals[cat] || 0}
 							{#if amount > 0}
-								<div class="p-2 rounded-lg border border-themed flex items-center gap-2">
+								<div class="p-2 rounded-lg border border-themed-light flex items-center gap-2">
 									<div class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {categoryColors[cat]}"></div>
 									<div class="min-w-0">
 										<p class="text-xs text-themed-secondary truncate">{EXPENSE_CATEGORY_EMOJIS[cat]} {cat}</p>
-										<p class="text-sm font-bold font-mono text-themed">{formatBRL(amount)}</p>
+										<p class="text-sm font-semibold font-mono text-themed">{formatBRL(amount)}</p>
 									</div>
 								</div>
 							{/if}
@@ -320,7 +320,7 @@
 					</div>
 					{#if allTimePieData.length > 0}
 						<div class="flex items-center justify-center">
-							<PieChart data={allTimePieData} height={200} />
+							<PieChart data={allTimePieData} height={220} />
 						</div>
 					{/if}
 				</div>
@@ -329,7 +329,7 @@
 
 		<!-- Chart -->
 		{#if chartData.labels.length > 0}
-			<div class="mt-6 pt-6 border-t border-themed">
+			<div class="mt-6 pt-6 border-t border-themed-light">
 				<h4 class="text-sm font-semibold text-themed-secondary uppercase tracking-wide mb-4">
 					{selectedCategory.label} Evolution
 				</h4>
@@ -347,15 +347,15 @@
 	{#if allPersonTotals.length === 0}
 		<Card>
 			<div class="py-12 text-center">
-				<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-themed-tertiary flex items-center justify-center">
-					<svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-themed-tertiary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<div class="w-14 h-14 mx-auto mb-3 rounded-full bg-themed-tertiary flex items-center justify-center">
+					<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-themed-tertiary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
 						<circle cx="12" cy="12" r="10"/>
 						<line x1="12" y1="8" x2="12" y2="12"/>
 						<line x1="12" y1="16" x2="12.01" y2="16"/>
 					</svg>
 				</div>
-				<h3 class="text-lg font-medium text-themed mb-1">No transactions yet</h3>
-				<p class="text-themed-secondary">Add transactions to see {owner}'s summary</p>
+				<h3 class="text-base font-semibold text-themed mb-1">No transactions yet</h3>
+				<p class="text-sm text-themed-secondary">Add transactions to see {owner}'s summary</p>
 			</div>
 		</Card>
 	{:else}
@@ -396,31 +396,31 @@
 					</div>
 				</div>
 
-				<!-- Summary Stats -->
-				<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-					<div class="p-4 rounded-lg bg-positive/10">
+				<!-- Summary Stats — max 4 per row -->
+				<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 mb-6">
+					<div class="p-3 rounded-lg bg-positive/10">
 						<p class="text-xs font-medium text-themed-secondary mb-1">Income</p>
-						<p class="text-lg font-bold font-mono text-positive">{formatBRL(person.income)}</p>
+						<p class="text-base font-semibold font-mono text-positive">{formatBRL(person.income)}</p>
 					</div>
-					<div class="p-4 rounded-lg bg-info/10">
+					<div class="p-3 rounded-lg bg-info/10">
 						<p class="text-xs font-medium text-themed-secondary mb-1">Credit</p>
-						<p class="text-lg font-bold font-mono text-info">{formatBRL(person.credit)}</p>
+						<p class="text-base font-semibold font-mono text-info">{formatBRL(person.credit)}</p>
 					</div>
-					<div class="p-4 rounded-lg bg-primary/10">
+					<div class="p-3 rounded-lg bg-primary/10">
 						<p class="text-xs font-medium text-themed-secondary mb-1">Total Revenue</p>
-						<p class="text-lg font-bold font-mono text-primary">{formatBRL(person.income + person.credit)}</p>
+						<p class="text-base font-semibold font-mono text-primary">{formatBRL(person.income + person.credit)}</p>
 					</div>
-					<div class="p-4 rounded-lg bg-themed-tertiary">
+					<div class="p-3 rounded-lg bg-themed-tertiary">
 						<p class="text-xs font-medium text-themed-secondary mb-1">Total Paid</p>
-						<p class="text-lg font-bold font-mono text-themed">{formatBRL(person.total)}</p>
+						<p class="text-base font-semibold font-mono text-themed">{formatBRL(person.total)}</p>
 					</div>
-					<div class="p-4 rounded-lg bg-warning/10">
+					<div class="p-3 rounded-lg bg-warning/10">
 						<p class="text-xs font-medium text-themed-secondary mb-1">Real Spending</p>
-						<p class="text-lg font-bold font-mono text-warning">{formatBRL(person.realSpending)}</p>
+						<p class="text-base font-semibold font-mono text-warning">{formatBRL(person.realSpending)}</p>
 					</div>
-					<div class="p-4 rounded-lg {person.debt > 0 ? 'bg-negative/10' : person.debt < 0 ? 'bg-positive/10' : 'bg-themed-tertiary'}">
+					<div class="p-3 rounded-lg {person.debt > 0 ? 'bg-negative/10' : person.debt < 0 ? 'bg-positive/10' : 'bg-themed-tertiary'}">
 						<p class="text-xs font-medium text-themed-secondary mb-1">Balance</p>
-						<p class="text-lg font-bold font-mono {person.debt > 0 ? 'text-negative' : person.debt < 0 ? 'text-positive' : 'text-themed'}">
+						<p class="text-base font-semibold font-mono {person.debt > 0 ? 'text-negative' : person.debt < 0 ? 'text-positive' : 'text-themed'}">
 							{person.debt > 0 ? '-' : person.debt < 0 ? '+' : ''}{formatBRL(Math.abs(person.debt))}
 						</p>
 					</div>
@@ -430,9 +430,9 @@
 				<div class="space-y-4">
 					<h4 class="text-sm font-semibold text-themed-secondary uppercase tracking-wide">Detailed Breakdown</h4>
 
-					<div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
+					<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
 						<!-- 50/50 Split -->
-						<div class="p-3 rounded-lg border border-themed">
+						<div class="p-3 rounded-lg border border-themed-light">
 							<div class="flex items-center gap-2 mb-2">
 								<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 									<circle cx="12" cy="12" r="10"/>
@@ -440,11 +440,11 @@
 								</svg>
 								<p class="text-xs font-medium text-themed-secondary">50/50</p>
 							</div>
-							<p class="text-base font-bold font-mono text-themed">{formatBRL(person.split5050Paid)}</p>
+							<p class="text-sm font-semibold font-mono text-themed">{formatBRL(person.split5050Paid)}</p>
 						</div>
 
 						<!-- Household -->
-						<div class="p-3 rounded-lg border border-themed">
+						<div class="p-3 rounded-lg border border-themed-light">
 							<div class="flex items-center gap-2 mb-2">
 								<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-utilities" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 									<path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
@@ -452,22 +452,22 @@
 								</svg>
 								<p class="text-xs font-medium text-themed-secondary">Household</p>
 							</div>
-							<p class="text-base font-bold font-mono text-themed">{formatBRL(person.householdPaid)}</p>
+							<p class="text-sm font-semibold font-mono text-themed">{formatBRL(person.householdPaid)}</p>
 						</div>
 
 						<!-- Paid for Partner -->
-						<div class="p-3 rounded-lg border border-themed">
+						<div class="p-3 rounded-lg border border-themed-light">
 							<div class="flex items-center gap-2 mb-2">
 								<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-maria" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 									<path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
 								</svg>
 								<p class="text-xs font-medium text-themed-secondary">Paid for {partnerName}</p>
 							</div>
-							<p class="text-base font-bold font-mono text-themed">{formatBRL(person.paidForPartner)}</p>
+							<p class="text-sm font-semibold font-mono text-themed">{formatBRL(person.paidForPartner)}</p>
 						</div>
 
 						<!-- Personal -->
-						<div class="p-3 rounded-lg border border-themed">
+						<div class="p-3 rounded-lg border border-themed-light">
 							<div class="flex items-center gap-2 mb-2">
 								<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-themed-secondary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 									<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
@@ -475,11 +475,11 @@
 								</svg>
 								<p class="text-xs font-medium text-themed-secondary">Personal</p>
 							</div>
-							<p class="text-base font-bold font-mono text-themed">{formatBRL(person.personal)}</p>
+							<p class="text-sm font-semibold font-mono text-themed">{formatBRL(person.personal)}</p>
 						</div>
 
 						<!-- Settlement -->
-						<div class="p-3 rounded-lg border border-themed">
+						<div class="p-3 rounded-lg border border-themed-light">
 							<div class="flex items-center gap-2 mb-2">
 								<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-rent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 									<line x1="12" y1="1" x2="12" y2="23"/>
@@ -487,7 +487,7 @@
 								</svg>
 								<p class="text-xs font-medium text-themed-secondary">Settlement</p>
 							</div>
-							<p class="text-base font-bold font-mono text-rent">{formatBRL(person.settlement)}</p>
+							<p class="text-sm font-semibold font-mono text-rent">{formatBRL(person.settlement)}</p>
 						</div>
 					</div>
 				</div>
@@ -508,11 +508,11 @@
 								{#each EXPENSE_CATEGORIES as cat}
 									{@const amount = person.categoryTotals[cat] || 0}
 									{#if amount > 0}
-										<div class="p-2 rounded-lg border border-themed flex items-center gap-2">
+										<div class="p-2 rounded-lg border border-themed-light flex items-center gap-2">
 											<div class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {categoryColors[cat]}"></div>
 											<div class="min-w-0">
 												<p class="text-xs text-themed-secondary truncate">{EXPENSE_CATEGORY_EMOJIS[cat]} {cat}</p>
-												<p class="text-sm font-bold font-mono text-themed">{formatBRL(amount)}</p>
+												<p class="text-sm font-semibold font-mono text-themed">{formatBRL(amount)}</p>
 											</div>
 										</div>
 									{/if}
@@ -520,7 +520,7 @@
 							</div>
 							{#if pieData.length > 0}
 								<div class="flex items-center justify-center">
-									<PieChart data={pieData} height={200} />
+									<PieChart data={pieData} height={220} />
 								</div>
 							{/if}
 						</div>
@@ -529,7 +529,7 @@
 					<!-- Income Flow Sankey -->
 					{@const sankeyData = transformPersonToSankeyData(person)}
 					{#if sankeyData.links.length > 0}
-						<div class="mt-6 pt-6 border-t border-themed">
+						<div class="mt-6 pt-6 border-t border-themed-light">
 							<h4 class="text-sm font-semibold text-themed-secondary uppercase tracking-wide mb-4">
 								Income Flow
 							</h4>
@@ -550,8 +550,8 @@
 									</svg>
 								</div>
 								<div>
-									<p class="font-semibold text-negative">{owner} owes {partnerName}</p>
-									<p class="text-sm text-themed-secondary">For this month</p>
+									<p class="font-semibold text-sm text-negative">{owner} owes {partnerName}</p>
+									<p class="text-xs text-themed-secondary">For this month</p>
 								</div>
 							{:else if person.debt < 0}
 								<div class="w-10 h-10 rounded-full bg-positive/20 flex items-center justify-center">
@@ -561,8 +561,8 @@
 									</svg>
 								</div>
 								<div>
-									<p class="font-semibold text-positive">{partnerName} owes {owner}</p>
-									<p class="text-sm text-themed-secondary">For this month</p>
+									<p class="font-semibold text-sm text-positive">{partnerName} owes {owner}</p>
+									<p class="text-xs text-themed-secondary">For this month</p>
 								</div>
 							{:else}
 								<div class="w-10 h-10 rounded-full bg-themed-tertiary flex items-center justify-center">
@@ -572,12 +572,12 @@
 									</svg>
 								</div>
 								<div>
-									<p class="font-semibold text-themed">All settled!</p>
-									<p class="text-sm text-themed-secondary">For this month</p>
+									<p class="font-semibold text-sm text-themed">All settled!</p>
+									<p class="text-xs text-themed-secondary">For this month</p>
 								</div>
 							{/if}
 						</div>
-						<p class="text-2xl font-bold font-mono {person.debt > 0 ? 'text-negative' : person.debt < 0 ? 'text-positive' : 'text-themed'}">
+						<p class="text-xl font-semibold font-mono {person.debt > 0 ? 'text-negative' : person.debt < 0 ? 'text-positive' : 'text-themed'}">
 							{formatBRL(Math.abs(person.debt))}
 						</p>
 					</div>

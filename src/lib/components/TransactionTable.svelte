@@ -16,6 +16,7 @@
 
 	let searchInput = $state('');
 	let showFutureTransactions = $state(false);
+	let showFilters = $state(false);
 
 	// Filter states
 	let filterType = $state<ExpenseType | 'all'>('all');
@@ -280,6 +281,20 @@
 		}
 	}
 
+	// Left border color for expense type
+	function getTypeBorderColor(type: ExpenseType): string {
+		switch (type) {
+			case 'Income': return 'border-l-positive';
+			case 'Credit': return 'border-l-info';
+			case 'Settlement': return 'border-l-rent';
+			case 'Personal': return 'border-l-other';
+			case 'Household': return 'border-l-utilities';
+			case 'Split 50/50': return 'border-l-warning';
+			case 'Paid for Partner': return 'border-l-leisure';
+			default: return 'border-l-themed-tertiary';
+		}
+	}
+
 	// Group transactions by date
 	const groupedTransactions = $derived(() => {
 		const groups = groupTransactionsByDate(visibleTransactions());
@@ -292,72 +307,91 @@
 
 <Card padding="none">
 	<!-- Search Header -->
-	<div class="p-4 border-b border-themed">
-		<div class="flex gap-3 items-center">
-			<div class="flex-1 relative">
-				<svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-themed-tertiary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-					<circle cx="11" cy="11" r="8"/>
-					<line x1="21" y1="21" x2="16.65" y2="16.65"/>
-				</svg>
-				<input
-					type="text"
-					bind:value={searchInput}
-					oninput={handleSearch}
-					placeholder="Search transactions..."
-					class="w-full pl-10 pr-4 py-2 bg-themed-secondary border-none rounded-lg text-themed placeholder:text-themed-tertiary transition-theme focus:outline-none focus:ring-2 focus:ring-primary"
-				/>
-			</div>
-			{#if searchInput}
-				<Button variant="ghost" size="sm" onclick={clearSearch}>
-					<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<line x1="18" y1="6" x2="6" y2="18"/>
-						<line x1="6" y1="6" x2="18" y2="18"/>
-					</svg>
-					Clear
-				</Button>
-			{/if}
-		</div>
-
-		<!-- Filters -->
-		<div class="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
-			<Select
-				label="Type"
-				bind:value={filterType}
-				options={filterTypeOptions}
+	<div class="p-4 border-b border-themed-light">
+		<div class="relative">
+			<svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-themed-tertiary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<circle cx="11" cy="11" r="8"/>
+				<line x1="21" y1="21" x2="16.65" y2="16.65"/>
+			</svg>
+			<input
+				type="text"
+				bind:value={searchInput}
+				oninput={handleSearch}
+				placeholder="Search transactions..."
+				class="w-full min-h-[44px] pl-10 pr-20 py-2.5 bg-themed-secondary border-none rounded-xl text-themed text-[16px] sm:text-sm placeholder:text-themed-tertiary transition-all focus:outline-none focus:ring-2 focus:ring-primary/30"
 			/>
-			<Select
-				label="Category"
-				bind:value={filterCategory}
-				options={filterCategoryOptions}
-			/>
-			<Select
-				label="Owner"
-				bind:value={filterOwner}
-				options={filterOwnerOptions}
-			/>
-		</div>
-
-		<!-- Stats and Controls -->
-		<div class="flex items-center justify-between mt-3">
-			<div class="flex items-center gap-3">
-				<p class="text-sm text-themed-secondary">
-					{visibleTransactions().length} transaction{visibleTransactions().length !== 1 ? 's' : ''}
-					{expenses.searchQuery ? `matching "${expenses.searchQuery}"` : ''}
-				</p>
-				{#if hasActiveFilters}
-					<Button variant="ghost" size="sm" onclick={clearFilters}>
+			<div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
+				{#if searchInput}
+					<button
+						onclick={clearSearch}
+						class="p-1.5 rounded-lg text-themed-tertiary hover:text-themed hover:bg-themed-tertiary transition-colors cursor-pointer"
+						aria-label="Clear search"
+					>
 						<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 							<line x1="18" y1="6" x2="6" y2="18"/>
 							<line x1="6" y1="6" x2="18" y2="18"/>
 						</svg>
-						Clear Filters
-					</Button>
+					</button>
+				{/if}
+				<button
+					onclick={() => showFilters = !showFilters}
+					class="p-1.5 rounded-lg transition-colors cursor-pointer {showFilters || hasActiveFilters ? 'text-primary bg-primary/10' : 'text-themed-tertiary hover:text-themed hover:bg-themed-tertiary'}"
+					aria-label="Toggle filters"
+				>
+					<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+					</svg>
+					{#if hasActiveFilters}
+						<span class="absolute -top-0.5 -right-0.5 w-2 h-2 bg-primary rounded-full"></span>
+					{/if}
+				</button>
+			</div>
+		</div>
+
+		<!-- Collapsible Filters -->
+		{#if showFilters}
+			<div class="mt-3 animate-slide-down">
+				<div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+					<Select
+						label="Type"
+						bind:value={filterType}
+						options={filterTypeOptions}
+					/>
+					<Select
+						label="Category"
+						bind:value={filterCategory}
+						options={filterCategoryOptions}
+					/>
+					<Select
+						label="Owner"
+						bind:value={filterOwner}
+						options={filterOwnerOptions}
+					/>
+				</div>
+				{#if hasActiveFilters}
+					<div class="mt-2 flex justify-end">
+						<Button variant="ghost" size="sm" onclick={clearFilters}>
+							<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<line x1="18" y1="6" x2="6" y2="18"/>
+								<line x1="6" y1="6" x2="18" y2="18"/>
+							</svg>
+							Clear Filters
+						</Button>
+					</div>
 				{/if}
 			</div>
+		{/if}
+
+		<!-- Stats and Controls -->
+		<div class="flex items-center justify-between mt-3">
+			<p class="text-xs text-themed-tertiary">
+				{visibleTransactions().length} transaction{visibleTransactions().length !== 1 ? 's' : ''}
+				{expenses.searchQuery ? ` matching "${expenses.searchQuery}"` : ''}
+			</p>
 			{#if futureTransactionsCount() > 0 || showFutureTransactions}
 				<label class="flex items-center gap-2 cursor-pointer">
-					<span class="text-sm text-themed-secondary">
-						Show future ({futureTransactionsCount()})
+					<span class="text-xs text-themed-tertiary">
+						Future ({futureTransactionsCount()})
 					</span>
 					<button
 						type="button"
@@ -365,7 +399,7 @@
 						aria-checked={showFutureTransactions}
 						aria-label="Toggle future transactions"
 						onclick={() => showFutureTransactions = !showFutureTransactions}
-						class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors {showFutureTransactions ? 'bg-primary' : 'bg-themed-tertiary'}"
+						class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors cursor-pointer {showFutureTransactions ? 'bg-primary' : 'bg-themed-tertiary'}"
 					>
 						<span
 							class="inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform {showFutureTransactions ? 'translate-x-4' : 'translate-x-0.5'}"
@@ -379,8 +413,8 @@
 	<!-- Transaction List -->
 	{#if visibleTransactions().length === 0}
 		<div class="p-12 text-center">
-			<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-themed-tertiary flex items-center justify-center">
-				<svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-themed-tertiary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<div class="w-14 h-14 mx-auto mb-3 rounded-full bg-themed-tertiary flex items-center justify-center">
+				<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-themed-tertiary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
 					<rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
 					<line x1="16" y1="2" x2="16" y2="6"/>
 					<line x1="8" y1="2" x2="8" y2="6"/>
@@ -388,30 +422,30 @@
 				</svg>
 			</div>
 			{#if expenses.transactions.length === 0}
-				<h3 class="text-lg font-medium text-themed mb-1">No transactions yet</h3>
-				<p class="text-themed-secondary">Add your first transaction above or import from CSV</p>
+				<h3 class="text-base font-semibold text-themed mb-1">No transactions yet</h3>
+				<p class="text-sm text-themed-secondary">Add your first transaction above to get started</p>
 			{:else if futureTransactionsCount() > 0 && !showFutureTransactions}
-				<h3 class="text-lg font-medium text-themed mb-1">No past transactions</h3>
-				<p class="text-themed-secondary">Toggle "Show future" to see upcoming transactions</p>
+				<h3 class="text-base font-semibold text-themed mb-1">No past transactions</h3>
+				<p class="text-sm text-themed-secondary">Toggle "Future" to see upcoming transactions</p>
 			{:else}
-				<h3 class="text-lg font-medium text-themed mb-1">No results found</h3>
-				<p class="text-themed-secondary">Try adjusting your search</p>
+				<h3 class="text-base font-semibold text-themed mb-1">No results found</h3>
+				<p class="text-sm text-themed-secondary">Try adjusting your search or filters</p>
 			{/if}
 		</div>
 	{:else}
 		<div class="divide-y divide-themed-light">
 			{#each groupedTransactions() as group}
 				<!-- Date Group Header -->
-				<div class="px-4 py-2 bg-themed-secondary">
-					<span class="text-sm font-medium text-themed-secondary">
+				<div class="sticky top-0 z-10 px-4 py-2 bg-themed-secondary/95 backdrop-blur-sm border-b border-themed-light">
+					<span class="text-xs font-semibold text-themed-secondary uppercase tracking-wider">
 						{formatRelativeDate(group.date)}
 					</span>
 				</div>
 
 				<!-- Transactions for this date -->
 				{#each group.transactions as tx (tx.id)}
-					<div class="px-4 py-3 hover:bg-themed-secondary/50 transition-colors group">
-						<div class="flex items-center gap-4">
+					<div class="px-4 py-3 hover:bg-themed-secondary/30 transition-colors border-l-3 {getTypeBorderColor(tx.type)}">
+						<div class="flex items-center gap-3">
 							<!-- Owner Avatar -->
 							<Avatar
 								name={tx.owner}
@@ -421,8 +455,8 @@
 
 							<!-- Transaction Details -->
 							<div class="flex-1 min-w-0">
-								<div class="flex items-center gap-2 mb-0.5 flex-wrap">
-									<span class="font-medium text-themed truncate">
+								<div class="flex items-center gap-1.5 mb-0.5 flex-wrap">
+									<span class="font-medium text-sm text-themed truncate">
 										{tx.description}
 									</span>
 									<Badge variant={getTypeBadgeVariant(tx.type)} size="sm">
@@ -434,36 +468,36 @@
 										</Badge>
 									{/if}
 								</div>
-								<p class="text-sm text-themed-secondary">
+								<p class="text-xs text-themed-tertiary">
 									{tx.owner}
 								</p>
 							</div>
 
 							<!-- Amount -->
-							<div class="text-right">
-								<span class="font-semibold font-mono {tx.type === 'Income' ? 'text-positive' : 'text-themed'}">
+							<div class="text-right flex-shrink-0 min-w-[80px]">
+								<span class="font-semibold text-sm font-mono {tx.type === 'Income' ? 'text-positive' : 'text-themed'}">
 									{tx.type === 'Income' ? '+' : ''}{formatBRL(tx.amount)}
 								</span>
 							</div>
 
-							<!-- Action Buttons -->
-							<div class="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+							<!-- Action Buttons — always visible but subtle -->
+							<div class="flex items-center gap-0.5 flex-shrink-0">
 								<button
 									onclick={() => openEditModal(tx)}
-									class="p-2 rounded-lg text-themed-tertiary hover:text-primary hover:bg-primary/10"
+									class="p-2 rounded-lg text-themed-tertiary hover:text-primary hover:bg-primary/10 transition-colors cursor-pointer"
 									aria-label="Edit transaction"
 								>
-									<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 										<path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
 										<path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
 									</svg>
 								</button>
 								<button
 									onclick={() => openDeleteModal(tx)}
-									class="p-2 rounded-lg text-themed-tertiary hover:text-negative hover:bg-negative/10"
+									class="p-2 rounded-lg text-themed-tertiary hover:text-negative hover:bg-negative/10 transition-colors cursor-pointer"
 									aria-label="Delete transaction"
 								>
-									<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+									<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 										<polyline points="3 6 5 6 21 6"/>
 										<path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
 									</svg>
@@ -523,8 +557,10 @@
 						type="button"
 						onclick={() => editModal.owner = o}
 						disabled={editModal.isUpdating}
-						class="flex-1 py-2 px-3 rounded-lg border-2 text-sm font-medium transition-all disabled:opacity-50 {editModal.owner === o
-							? 'border-primary bg-primary/5 text-primary'
+						class="flex-1 py-2 px-3 rounded-lg border-2 text-sm font-medium transition-all disabled:opacity-50 cursor-pointer {editModal.owner === o
+							? o === 'Lorenzo'
+								? 'border-lorenzo bg-lorenzo text-white'
+								: 'border-maria bg-maria text-white'
 							: 'border-themed text-themed hover:border-themed-tertiary'}"
 					>
 						{o}

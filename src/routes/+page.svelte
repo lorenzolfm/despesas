@@ -1,5 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
+    import { fly, fade } from "svelte/transition";
     import Header from "$lib/components/Header.svelte";
     import TabNav from "$lib/components/TabNav.svelte";
     import BalanceHero from "$lib/components/BalanceHero.svelte";
@@ -121,41 +122,77 @@
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-        {#key activeTab}
-            {#if activeTab === "transactions"}
-                <div class="space-y-6 stagger-children">
-                    <!-- Balance Hero -->
-                    <BalanceHero monthlyTotals={expenses.monthlyTotals} />
+        {#if isLoading}
+            <!-- Loading Skeleton -->
+            <div class="space-y-4">
+                <!-- Balance hero skeleton -->
+                <div class="bg-themed rounded-xl border border-themed-light overflow-hidden">
+                    <div class="h-1 skeleton"></div>
+                    <div class="p-6 flex flex-col items-center gap-3">
+                        <div class="w-14 h-14 rounded-full skeleton"></div>
+                        <div class="h-5 w-40 skeleton"></div>
+                        <div class="h-10 w-48 skeleton"></div>
+                        <div class="h-3 w-56 skeleton"></div>
+                    </div>
+                </div>
+                <!-- Form button skeleton -->
+                <div class="h-12 skeleton rounded-xl"></div>
+                <!-- Transaction list skeleton -->
+                <div class="bg-themed rounded-xl border border-themed-light overflow-hidden">
+                    <div class="p-4 border-b border-themed-light">
+                        <div class="h-11 skeleton rounded-xl"></div>
+                    </div>
+                    {#each Array(4) as _}
+                        <div class="px-4 py-3 flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full skeleton flex-shrink-0"></div>
+                            <div class="flex-1 space-y-2">
+                                <div class="h-4 w-3/4 skeleton"></div>
+                                <div class="h-3 w-1/3 skeleton"></div>
+                            </div>
+                            <div class="h-4 w-20 skeleton"></div>
+                        </div>
+                    {/each}
+                </div>
+            </div>
+        {:else}
+            {#key activeTab}
+                <div in:fade={{ duration: 150 }}>
+                    {#if activeTab === "transactions"}
+                        <div class="space-y-4 stagger-children">
+                            <!-- Balance Hero -->
+                            <BalanceHero monthlyTotals={expenses.monthlyTotals} />
 
-                    <!-- Add Transaction Section -->
-                    <ExpenseForm onSuccess={fetchTransactions} />
+                            <!-- Add Transaction Section -->
+                            <ExpenseForm onSuccess={fetchTransactions} />
 
-                    <!-- Transactions List -->
-                    <TransactionTable
-                        onDelete={fetchTransactions}
-                        onUpdate={fetchTransactions}
-                    />
+                            <!-- Transactions List -->
+                            <TransactionTable
+                                onDelete={fetchTransactions}
+                                onUpdate={fetchTransactions}
+                            />
+                        </div>
+                    {:else if activeTab === "summary"}
+                        <div class="space-y-4 animate-fade-in">
+                            <BalanceHero monthlyTotals={expenses.monthlyTotals} />
+                            <CombinedSummary />
+                        </div>
+                    {:else if activeTab === "lorenzo"}
+                        <div class="animate-fade-in">
+                            <IndividualSummary owner="Lorenzo" />
+                        </div>
+                    {:else if activeTab === "maria"}
+                        <div class="animate-fade-in">
+                            <IndividualSummary owner="Maria" />
+                        </div>
+                    {/if}
                 </div>
-            {:else if activeTab === "summary"}
-                <div class="space-y-6 animate-fade-in">
-                    <BalanceHero monthlyTotals={expenses.monthlyTotals} />
-                    <CombinedSummary />
-                </div>
-            {:else if activeTab === "lorenzo"}
-                <div class="animate-fade-in">
-                    <IndividualSummary owner="Lorenzo" />
-                </div>
-            {:else if activeTab === "maria"}
-                <div class="animate-fade-in">
-                    <IndividualSummary owner="Maria" />
-                </div>
-            {/if}
-        {/key}
+            {/key}
+        {/if}
     </main>
 
     <!-- Footer -->
     <footer class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
-        <p class="text-sm text-themed-secondary mb-4">
+        <p class="text-xs text-themed-tertiary">
             Despesas - Expense tracking for Lorenzo & Maria
         </p>
     </footer>

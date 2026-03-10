@@ -166,14 +166,14 @@
       placeholder="dd/mm/aaaa"
       {disabled}
       {required}
-      class="w-full px-3 py-2 pr-10 bg-themed border border-themed rounded-lg text-themed placeholder:text-themed-tertiary transition-theme focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed {error ? 'border-negative focus:ring-negative' : ''}"
+      class="w-full min-h-[44px] px-3 py-2 pr-10 bg-themed border border-themed rounded-lg text-themed text-[16px] sm:text-sm placeholder:text-themed-tertiary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed {error ? 'border-negative focus:ring-negative/30' : ''}"
     />
     <button
       type="button"
       onclick={() => showCalendar = !showCalendar}
       {disabled}
       aria-label="Toggle calendar"
-      class="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-themed-secondary hover:text-themed disabled:opacity-50"
+      class="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-themed-secondary hover:text-themed disabled:opacity-50 cursor-pointer"
     >
       <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
@@ -185,29 +185,29 @@
   </div>
 
   {#if showCalendar && !disabled}
-    <div class="absolute z-50 mt-1 p-3 bg-themed border border-themed rounded-lg shadow-lg min-w-[280px]">
+    <div class="absolute z-50 mt-1 p-3 bg-themed border border-themed-light rounded-xl shadow-themed-lg min-w-[280px] animate-slide-down">
       <!-- Header -->
       <div class="flex items-center justify-between mb-3">
         <button
           type="button"
           onclick={prevMonth}
           aria-label="Previous month"
-          class="p-1 hover:bg-themed-tertiary rounded transition-colors"
+          class="p-1.5 hover:bg-themed-tertiary rounded-lg transition-colors cursor-pointer"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-themed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-themed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="15 18 9 12 15 6"/>
           </svg>
         </button>
-        <span class="font-medium text-themed">
+        <span class="text-sm font-semibold text-themed">
           {monthNames[viewDate.getMonth()]} {viewDate.getFullYear()}
         </span>
         <button
           type="button"
           onclick={nextMonth}
           aria-label="Next month"
-          class="p-1 hover:bg-themed-tertiary rounded transition-colors"
+          class="p-1.5 hover:bg-themed-tertiary rounded-lg transition-colors cursor-pointer"
         >
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-themed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-themed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="9 18 15 12 9 6"/>
           </svg>
         </button>
@@ -216,7 +216,7 @@
       <!-- Day names -->
       <div class="grid grid-cols-7 gap-1 mb-1">
         {#each dayNames as day}
-          <div class="text-center text-xs font-medium text-themed-secondary py-1">
+          <div class="text-center text-xs font-medium text-themed-tertiary py-1">
             {day}
           </div>
         {/each}
@@ -231,11 +231,11 @@
             <button
               type="button"
               onclick={() => selectDay(day)}
-              class="w-8 h-8 text-sm rounded-full transition-colors
+              class="w-8 h-8 text-sm rounded-full transition-colors cursor-pointer
                 {isSelected(day)
-                  ? 'bg-primary text-white'
+                  ? 'bg-primary text-white font-semibold'
                   : isToday(day)
-                    ? 'bg-primary/20 text-primary hover:bg-primary/30'
+                    ? 'bg-primary/15 text-primary font-medium hover:bg-primary/25'
                     : 'text-themed hover:bg-themed-tertiary'}"
             >
               {day}

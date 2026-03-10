@@ -21,14 +21,14 @@
     children
   }: Props = $props();
 
-  const baseClasses = 'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.97] active:transition-transform';
+  const baseClasses = 'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.97]';
 
   const variantClasses = {
-    primary: 'bg-primary text-white hover:bg-primary-dark focus:ring-primary dark:focus:ring-offset-gray-800',
-    secondary: 'bg-themed-tertiary text-themed border border-themed hover:bg-themed-secondary focus:ring-primary dark:focus:ring-offset-gray-800',
-    ghost: 'text-themed-secondary hover:bg-themed-tertiary hover:text-themed focus:ring-primary dark:focus:ring-offset-gray-800',
-    danger: 'bg-negative text-white hover:bg-red-600 focus:ring-negative dark:focus:ring-offset-gray-800',
-    success: 'bg-positive text-white hover:bg-green-600 focus:ring-positive dark:focus:ring-offset-gray-800'
+    primary: 'bg-primary text-white hover:bg-primary-dark focus:ring-primary/40 shadow-sm shadow-primary/20 dark:focus:ring-offset-gray-900',
+    secondary: 'bg-themed-tertiary text-themed border border-themed hover:bg-themed-secondary focus:ring-primary/30 dark:focus:ring-offset-gray-900',
+    ghost: 'text-themed-secondary hover:bg-themed-tertiary hover:text-themed focus:ring-primary/30 dark:focus:ring-offset-gray-900',
+    danger: 'bg-negative text-white hover:bg-red-600 focus:ring-negative/40 dark:focus:ring-offset-gray-900',
+    success: 'bg-positive text-white hover:bg-green-600 focus:ring-positive/40 dark:focus:ring-offset-gray-900'
   };
 
   const sizeClasses = {

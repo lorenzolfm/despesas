@@ -13,6 +13,9 @@
 
 	const expenses = useExpenses();
 
+	// Collapsible state
+	let isExpanded = $state(false);
+
 	let owner = $state<Owner>('Lorenzo');
 	let description = $state('');
 	let amount = $state('');
@@ -22,10 +25,16 @@
 	let installments = $state(1);
 
 	let error = $state('');
+	let errorShake = $state(false);
 	let success = $state(false);
 	let successCount = $state(1);
 	let isSubmitting = $state(false);
 	let showConfirmModal = $state(false);
+
+	// Toast state
+	let showToast = $state(false);
+	let toastMessage = $state('');
+	let toastDismissing = $state(false);
 
 	// Store validated form data for confirmation
 	let confirmData = $state<{
@@ -47,6 +56,20 @@
 		...EXPENSE_CATEGORIES.map((c) => ({ value: c, label: `${EXPENSE_CATEGORY_EMOJIS[c]} ${c}` }))
 	];
 
+	function showErrorWithShake(msg: string) {
+		error = msg;
+		errorShake = true;
+		setTimeout(() => errorShake = false, 500);
+	}
+
+	function dismissToast() {
+		toastDismissing = true;
+		setTimeout(() => {
+			showToast = false;
+			toastDismissing = false;
+		}, 250);
+	}
+
 	function handleSubmit(e: Event) {
 		e.preventDefault();
 		error = '';
@@ -54,24 +77,24 @@
 
 		// Validation
 		if (!description.trim()) {
-			error = 'Description is required';
+			showErrorWithShake('Description is required');
 			return;
 		}
 
 		const parsedAmount = parseFloat(amount.replace(',', '.'));
 		if (isNaN(parsedAmount) || parsedAmount <= 0) {
-			error = 'Please enter a valid amount';
+			showErrorWithShake('Please enter a valid amount');
 			return;
 		}
 
 		if (!date || isNaN(date.getTime())) {
-			error = 'Please enter a valid date';
+			showErrorWithShake('Please enter a valid date');
 			return;
 		}
 
 		const parsedInstallments = Math.floor(Number(installments) || 1);
 		if (parsedInstallments < 1 || parsedInstallments > 48) {
-			error = 'Installments must be between 1 and 48';
+			showErrorWithShake('Installments must be between 1 and 48');
 			return;
 		}
 
@@ -113,23 +136,32 @@
 				throw new Error(result.error || 'Failed to save transaction');
 			}
 
-			// Reset form and show success
+			// Reset form
 			description = '';
 			amount = '';
 			category = '';
 			date = new Date();
 			installments = 1;
 			successCount = result.count || 1;
-			success = true;
 			confirmData = null;
+
+			// Collapse form
+			isExpanded = false;
+
+			// Show toast
+			toastMessage = successCount > 1
+				? `${successCount} transactions added successfully!`
+				: 'Transaction added successfully!';
+			showToast = true;
+			toastDismissing = false;
+
+			// Auto-dismiss toast
+			setTimeout(() => {
+				dismissToast();
+			}, 3000);
 
 			// Refresh the transactions list from Google Sheets
 			onSuccess?.();
-
-			// Hide success message after 3 seconds
-			setTimeout(() => {
-				success = false;
-			}, 3000);
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to save transaction. Please try again.';
 		} finally {
@@ -143,148 +175,190 @@
 	}
 </script>
 
-<Card>
-	<div class="flex items-center gap-3 mb-6">
-		<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-			<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				<line x1="12" y1="5" x2="12" y2="19"/>
-				<line x1="5" y1="12" x2="19" y2="12"/>
-			</svg>
-		</div>
-		<div>
-			<h2 class="text-lg font-semibold text-themed">Add Transaction</h2>
-			<p class="text-sm text-themed-secondary">Record a new expense or income</p>
+<!-- Toast Notification -->
+{#if showToast}
+	<div class="fixed top-4 right-4 z-[60] {toastDismissing ? 'animate-toast-out' : 'animate-toast-in'}">
+		<div class="flex items-center gap-3 px-4 py-3 rounded-xl bg-themed shadow-themed-lg border border-positive/20">
+			<div class="w-8 h-8 rounded-full bg-positive/10 flex items-center justify-center flex-shrink-0">
+				<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-positive" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+					<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+					<polyline points="22 4 12 14.01 9 11.01"/>
+				</svg>
+			</div>
+			<span class="text-sm font-medium text-themed">{toastMessage}</span>
+			<button
+				onclick={dismissToast}
+				class="p-1 rounded-lg text-themed-tertiary hover:text-themed hover:bg-themed-tertiary transition-colors cursor-pointer"
+				aria-label="Dismiss"
+			>
+				<svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+					<line x1="18" y1="6" x2="6" y2="18"/>
+					<line x1="6" y1="6" x2="18" y2="18"/>
+				</svg>
+			</button>
 		</div>
 	</div>
+{/if}
 
-	{#if error}
-		<div class="mb-4 p-3 rounded-lg bg-negative/10 border border-negative/20 flex items-center gap-2">
-			<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-negative flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				<circle cx="12" cy="12" r="10"/>
-				<line x1="12" y1="8" x2="12" y2="12"/>
-				<line x1="12" y1="16" x2="12.01" y2="16"/>
-			</svg>
-			<span class="text-sm text-negative">{error}</span>
-		</div>
-	{/if}
-
-	{#if success}
-		<div class="mb-4 p-3 rounded-lg bg-positive/10 border border-positive/20 flex items-center gap-2">
-			<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-positive flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-				<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
-				<polyline points="22 4 12 14.01 9 11.01"/>
-			</svg>
-			<span class="text-sm text-positive">
-				{#if successCount > 1}
-					{successCount} transactions added successfully!
-				{:else}
-					Transaction added successfully!
-				{/if}
-			</span>
-		</div>
-	{/if}
-
-	<form onsubmit={handleSubmit} class="space-y-4">
-		<!-- Owner Selection -->
-		<fieldset>
-			<legend class="block text-sm font-medium text-themed-secondary mb-2">Who paid?</legend>
-			<div class="flex gap-3">
-				{#each OWNERS as o}
-					<button
-						type="button"
-						onclick={() => (owner = o)}
-						disabled={isSubmitting}
-						class="flex-1 flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed {owner === o
-							? 'border-primary bg-primary/5'
-							: 'border-themed hover:border-themed-tertiary bg-themed'}"
-					>
-						<Avatar name={o} size="sm" color={o === 'Lorenzo' ? 'lorenzo' : 'maria'} />
-						<span class="font-medium text-themed">{o}</span>
-					</button>
-				{/each}
-			</div>
-		</fieldset>
-
-		<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-			<Select
-				label="Type"
-				bind:value={type}
-				options={typeOptions}
-				required
-			/>
-
-			<Input
-				type="text"
-				label="Amount (R$)"
-				bind:value={amount}
-				placeholder="0.00"
-				required
-			/>
-		</div>
-
-		<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-			<Input
-				type="text"
-				label="Description"
-				bind:value={description}
-				placeholder="What was this expense for?"
-				required
-			/>
-
-			<Select
-				label="Category"
-				bind:value={category}
-				options={categoryOptions}
-			/>
-		</div>
-
-		<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-			<DatePicker
-				label="Date"
-				bind:value={date}
-				disabled={isSubmitting}
-				required
-			/>
-
-			<Input
-				type="number"
-				label="Installments"
-				bind:value={installments}
-				min="1"
-				max="48"
-				placeholder="1"
-			/>
-		</div>
-
-		{#if showInstallmentPreview}
-			<div class="p-3 rounded-lg bg-primary/5 border border-primary/20">
-				<p class="text-sm text-themed-secondary">
-					Will create <span class="font-medium text-themed">{installments}</span> transactions from
-					<span class="font-medium text-themed">{formatDate(date)}</span> to
-					<span class="font-medium text-themed">{formatDate(addMonths(date, installments - 1))}</span>
-				</p>
-			</div>
-		{/if}
-
-		<div class="pt-2">
-			<Button type="submit" fullWidth disabled={isSubmitting}>
-				{#if isSubmitting}
-					<svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-						<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-						<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-					</svg>
-					Saving...
-				{:else}
+{#if !isExpanded}
+	<!-- Collapsed: Show "Add Transaction" button -->
+	<button
+		type="button"
+		onclick={() => { isExpanded = true; error = ''; }}
+		class="w-full flex items-center justify-center gap-2 px-4 py-3.5 rounded-xl bg-primary text-white font-semibold text-sm shadow-sm shadow-primary/20 hover:bg-primary-dark active:scale-[0.98] transition-all duration-200 cursor-pointer"
+	>
+		<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+			<line x1="12" y1="5" x2="12" y2="19"/>
+			<line x1="5" y1="12" x2="19" y2="12"/>
+		</svg>
+		Add Transaction
+	</button>
+{:else}
+	<!-- Expanded: Show the form -->
+	<div class="animate-slide-up">
+		<Card>
+			<div class="flex items-center justify-between mb-4">
+				<div class="flex items-center gap-3">
+					<div class="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">
+						<svg xmlns="http://www.w3.org/2000/svg" class="w-4.5 h-4.5 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<line x1="12" y1="5" x2="12" y2="19"/>
+							<line x1="5" y1="12" x2="19" y2="12"/>
+						</svg>
+					</div>
+					<div>
+						<h2 class="text-base font-semibold text-themed">Add Transaction</h2>
+						<p class="text-xs text-themed-secondary">Record a new expense or income</p>
+					</div>
+				</div>
+				<button
+					type="button"
+					onclick={() => isExpanded = false}
+					class="p-1.5 rounded-lg text-themed-tertiary hover:text-themed hover:bg-themed-tertiary transition-colors cursor-pointer"
+					aria-label="Close form"
+				>
 					<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-						<line x1="12" y1="5" x2="12" y2="19"/>
-						<line x1="5" y1="12" x2="19" y2="12"/>
+						<line x1="18" y1="6" x2="6" y2="18"/>
+						<line x1="6" y1="6" x2="18" y2="18"/>
 					</svg>
-					Add Transaction
+				</button>
+			</div>
+
+			{#if error}
+				<div class="mb-4 p-3 rounded-lg bg-negative/10 border border-negative/20 flex items-center gap-2 {errorShake ? 'animate-shake' : ''}">
+					<svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-negative flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						<circle cx="12" cy="12" r="10"/>
+						<line x1="12" y1="8" x2="12" y2="12"/>
+						<line x1="12" y1="16" x2="12.01" y2="16"/>
+					</svg>
+					<span class="text-sm text-negative">{error}</span>
+				</div>
+			{/if}
+
+			<form onsubmit={handleSubmit} class="space-y-4">
+				<!-- Owner Selection -->
+				<fieldset>
+					<legend class="block text-sm font-medium text-themed-secondary mb-2">Who paid?</legend>
+					<div class="flex gap-2">
+						{#each OWNERS as o}
+							<button
+								type="button"
+								onclick={() => (owner = o)}
+								disabled={isSubmitting}
+								class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg border-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer {owner === o
+									? o === 'Lorenzo'
+										? 'border-lorenzo bg-lorenzo text-white'
+										: 'border-maria bg-maria text-white'
+									: 'border-themed hover:border-themed-tertiary bg-themed text-themed'}"
+							>
+								<Avatar name={o} size="sm" color={owner === o ? 'primary' : (o === 'Lorenzo' ? 'lorenzo' : 'maria')} />
+								<span class="font-medium text-sm">{o}</span>
+							</button>
+						{/each}
+					</div>
+				</fieldset>
+
+				<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+					<Select
+						label="Type"
+						bind:value={type}
+						options={typeOptions}
+						required
+					/>
+
+					<Input
+						type="text"
+						label="Amount (R$)"
+						bind:value={amount}
+						placeholder="0.00"
+						required
+					/>
+				</div>
+
+				<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+					<Input
+						type="text"
+						label="Description"
+						bind:value={description}
+						placeholder="What was this expense for?"
+						required
+					/>
+
+					<Select
+						label="Category"
+						bind:value={category}
+						options={categoryOptions}
+					/>
+				</div>
+
+				<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+					<DatePicker
+						label="Date"
+						bind:value={date}
+						disabled={isSubmitting}
+						required
+					/>
+
+					<Input
+						type="number"
+						label="Installments"
+						bind:value={installments}
+						min="1"
+						max="48"
+						placeholder="1"
+					/>
+				</div>
+
+				{#if showInstallmentPreview}
+					<div class="p-3 rounded-lg bg-primary/5 border border-primary/20">
+						<p class="text-sm text-themed-secondary">
+							Will create <span class="font-medium text-themed">{installments}</span> transactions from
+							<span class="font-medium text-themed">{formatDate(date)}</span> to
+							<span class="font-medium text-themed">{formatDate(addMonths(date, installments - 1))}</span>
+						</p>
+					</div>
 				{/if}
-			</Button>
-		</div>
-	</form>
-</Card>
+
+				<div class="pt-1">
+					<Button type="submit" fullWidth disabled={isSubmitting}>
+						{#if isSubmitting}
+							<svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+								<circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+								<path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+							</svg>
+							Saving...
+						{:else}
+							<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+								<line x1="12" y1="5" x2="12" y2="19"/>
+								<line x1="5" y1="12" x2="19" y2="12"/>
+							</svg>
+							Add Transaction
+						{/if}
+					</Button>
+				</div>
+			</form>
+		</Card>
+	</div>
+{/if}
 
 <!-- Confirmation Modal -->
 <Modal
@@ -322,7 +396,7 @@
 				<!-- Amount -->
 				<div class="flex items-center justify-between py-2 border-b border-themed">
 					<span class="text-sm font-medium text-themed-secondary">Amount</span>
-					<span class="text-lg font-bold text-primary">{formatBRL(confirmData.amount)}</span>
+					<span class="text-lg font-bold text-primary font-mono">{formatBRL(confirmData.amount)}</span>
 				</div>
 
 				<!-- Description -->

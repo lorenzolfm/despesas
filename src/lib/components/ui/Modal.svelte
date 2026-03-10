@@ -44,7 +44,7 @@
 {#if open}
   <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
   <div
-    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-opacity"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in"
     onclick={handleBackdropClick}
     onkeydown={handleKeydown}
     role="alertdialog"
@@ -53,12 +53,24 @@
     tabindex="-1"
   >
     <div
-      class="bg-themed rounded-xl shadow-themed-lg border border-themed w-full max-w-md transform transition-all"
+      class="bg-themed rounded-xl shadow-themed-lg border border-themed-light w-full max-w-md animate-scale-in"
       role="document"
     >
       {#if title}
         <div class="px-6 py-4 border-b border-themed">
-          <h3 id="modal-title" class="text-lg font-semibold text-themed">{title}</h3>
+          <div class="flex items-center justify-between">
+            <h3 id="modal-title" class="text-lg font-semibold text-themed">{title}</h3>
+            <button
+              onclick={onclose}
+              class="p-1.5 -mr-1.5 rounded-lg text-themed-tertiary hover:text-themed hover:bg-themed-tertiary transition-colors"
+              aria-label="Close"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="6" x2="6" y2="18"/>
+                <line x1="6" y1="6" x2="18" y2="18"/>
+              </svg>
+            </button>
+          </div>
         </div>
       {/if}
 

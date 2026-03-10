@@ -143,32 +143,32 @@
 	<!-- Header + Aggregated Totals Card -->
 	<Card>
 		<div class="flex items-center gap-4 mb-6">
-			<div class="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
-				<svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+			<div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+				<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-primary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 					<line x1="18" y1="20" x2="18" y2="10"/>
 					<line x1="12" y1="20" x2="12" y2="4"/>
 					<line x1="6" y1="20" x2="6" y2="14"/>
 				</svg>
 			</div>
 			<div class="flex-1">
-				<h2 class="text-2xl font-bold text-themed">Combined Summary</h2>
-				<p class="text-themed-secondary">Household totals and breakdown</p>
+				<h2 class="text-xl font-semibold text-themed">Combined Summary</h2>
+				<p class="text-sm text-themed-secondary">Household totals and breakdown</p>
 			</div>
 			<div class="text-right">
-				<p class="text-sm text-themed-secondary mb-1">Grand Total</p>
-				<p class="text-xl font-bold font-mono text-themed">{formatBRL(aggregatedTotals.grandTotal)}</p>
+				<p class="text-xs text-themed-tertiary mb-0.5">Grand Total</p>
+				<p class="text-lg font-semibold font-mono text-themed">{formatBRL(aggregatedTotals.grandTotal)}</p>
 			</div>
 		</div>
 
-		<!-- Aggregated Category Breakdown (Clickable) -->
-		<div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
+		<!-- Aggregated Category Breakdown (Clickable) — max 4 per row -->
+		<div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
 			{#each categories as cat}
 				{@const value = aggregatedTotals[cat.key]}
 				{@const isSelected = selectedChartCategory === cat.key}
 				<button
 					type="button"
 					onclick={() => selectedChartCategory = cat.key}
-					class="p-3 rounded-lg {cat.bgColor} text-left transition-all {isSelected ? 'ring-2 ring-offset-2 ring-offset-themed' : 'hover:opacity-80'}"
+					class="p-3 rounded-lg {cat.bgColor} text-left transition-all cursor-pointer {isSelected ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed' : 'hover:opacity-80'}"
 					style={isSelected ? `--tw-ring-color: ${cat.chartColor}` : ''}
 				>
 					<p class="text-xs font-medium text-themed-secondary mb-1">{cat.label}</p>
@@ -181,7 +181,7 @@
 
 		<!-- Chart -->
 		{#if chartData.labels.length > 0}
-			<div class="mt-6 pt-6 border-t border-themed">
+			<div class="mt-6 pt-6 border-t border-themed-light">
 				<h4 class="text-sm font-semibold text-themed-secondary uppercase tracking-wide mb-4">
 					{selectedCategory.label} Evolution
 				</h4>
@@ -197,21 +197,34 @@
 
 		<!-- Aggregated Income Shares -->
 		{#if aggregatedTotals.totalIncome > 0}
-			<div class="mt-6 pt-6 border-t border-themed">
-				<p class="text-sm text-themed-secondary mb-3">Income Share (all months)</p>
-				<div class="grid grid-cols-2 gap-4">
-					<div class="flex items-center gap-3 p-3 rounded-lg bg-lorenzo/10">
-						<Avatar name="Lorenzo" size="sm" color="lorenzo" />
-						<div>
-							<p class="text-sm font-medium text-themed">Lorenzo</p>
-							<p class="text-lg font-bold text-lorenzo">{aggregatedShares().lorenzo}%</p>
-						</div>
+			<div class="mt-6 pt-6 border-t border-themed-light">
+				<p class="text-sm font-semibold text-themed-secondary uppercase tracking-wide mb-3">Income Share (all months)</p>
+				<div class="space-y-3">
+					<!-- Progress bar -->
+					<div class="h-3 rounded-full overflow-hidden flex bg-themed-tertiary">
+						<div
+							class="bg-lorenzo transition-all duration-500 rounded-l-full"
+							style="width: {aggregatedShares().lorenzo}%"
+						></div>
+						<div
+							class="bg-maria transition-all duration-500 rounded-r-full"
+							style="width: {aggregatedShares().maria}%"
+						></div>
 					</div>
-					<div class="flex items-center gap-3 p-3 rounded-lg bg-maria/10">
-						<Avatar name="Maria" size="sm" color="maria" />
-						<div>
-							<p class="text-sm font-medium text-themed">Maria</p>
-							<p class="text-lg font-bold text-maria">{aggregatedShares().maria}%</p>
+					<div class="grid grid-cols-2 gap-3">
+						<div class="flex items-center gap-3 p-3 rounded-lg bg-lorenzo/10">
+							<Avatar name="Lorenzo" size="sm" color="lorenzo" />
+							<div>
+								<p class="text-sm font-medium text-themed">Lorenzo</p>
+								<p class="text-base font-semibold text-lorenzo">{aggregatedShares().lorenzo}%</p>
+							</div>
+						</div>
+						<div class="flex items-center gap-3 p-3 rounded-lg bg-maria/10">
+							<Avatar name="Maria" size="sm" color="maria" />
+							<div>
+								<p class="text-sm font-medium text-themed">Maria</p>
+								<p class="text-base font-semibold text-maria">{aggregatedShares().maria}%</p>
+							</div>
 						</div>
 					</div>
 				</div>
@@ -227,18 +240,18 @@
 					value: amount,
 					color: categoryColors[category] || '#6b7280'
 				}))}
-			<div class="mt-6 pt-6 border-t border-themed">
+			<div class="mt-6 pt-6 border-t border-themed-light">
 				<h4 class="text-sm font-semibold text-themed-secondary uppercase tracking-wide mb-4">By Category (All Time)</h4>
 				<div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
 					<div class="grid grid-cols-2 gap-2">
 						{#each EXPENSE_CATEGORIES as cat}
 							{@const amount = aggregatedCategoryTotals[cat] || 0}
 							{#if amount > 0}
-								<div class="p-2 rounded-lg border border-themed flex items-center gap-2">
+								<div class="p-2 rounded-lg border border-themed-light flex items-center gap-2">
 									<div class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {categoryColors[cat]}"></div>
 									<div class="min-w-0">
 										<p class="text-xs text-themed-secondary truncate">{EXPENSE_CATEGORY_EMOJIS[cat]} {cat}</p>
-										<p class="text-sm font-bold font-mono text-themed">{formatBRL(amount)}</p>
+										<p class="text-sm font-semibold font-mono text-themed">{formatBRL(amount)}</p>
 									</div>
 								</div>
 							{/if}
@@ -246,7 +259,7 @@
 					</div>
 					{#if allTimePieData.length > 0}
 						<div class="flex items-center justify-center">
-							<PieChart data={allTimePieData} height={200} />
+							<PieChart data={allTimePieData} height={220} />
 						</div>
 					{/if}
 				</div>
@@ -257,15 +270,15 @@
 	{#if allMonthlyTotals.length === 0}
 		<Card>
 			<div class="py-12 text-center">
-				<div class="w-16 h-16 mx-auto mb-4 rounded-full bg-themed-tertiary flex items-center justify-center">
-					<svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-themed-tertiary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+				<div class="w-14 h-14 mx-auto mb-3 rounded-full bg-themed-tertiary flex items-center justify-center">
+					<svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-themed-tertiary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
 						<line x1="18" y1="20" x2="18" y2="10"/>
 						<line x1="12" y1="20" x2="12" y2="4"/>
 						<line x1="6" y1="20" x2="6" y2="14"/>
 					</svg>
 				</div>
-				<h3 class="text-lg font-medium text-themed mb-1">No data yet</h3>
-				<p class="text-themed-secondary">Add transactions to see your monthly summary</p>
+				<h3 class="text-base font-semibold text-themed mb-1">No data yet</h3>
+				<p class="text-sm text-themed-secondary">Add transactions to see your monthly summary</p>
 			</div>
 		</Card>
 	{:else}
@@ -305,8 +318,8 @@
 					</div>
 				</div>
 
-				<!-- Category Breakdown -->
-				<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3 mb-6">
+				<!-- Category Breakdown — max 4 per row -->
+				<div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
 					{#each categories as cat}
 						{@const value = cat.key === 'totalRevenue' ? month.totalIncome + month.totalCredit : month[cat.key]}
 						<div class="p-3 rounded-lg {cat.bgColor}">
@@ -321,7 +334,7 @@
 				<!-- Total -->
 				<div class="p-4 rounded-lg bg-themed-secondary flex items-center justify-between mb-6">
 					<span class="font-medium text-themed">Total Expenses</span>
-					<span class="text-xl font-bold font-mono text-themed">{formatBRL(month.grandTotal)}</span>
+					<span class="text-lg font-semibold font-mono text-themed">{formatBRL(month.grandTotal)}</span>
 				</div>
 
 				<!-- By Category (Monthly) with Pie Chart -->
@@ -340,11 +353,11 @@
 								{#each EXPENSE_CATEGORIES as cat}
 									{@const amount = month.categoryTotals[cat] || 0}
 									{#if amount > 0}
-										<div class="p-2 rounded-lg border border-themed flex items-center gap-2">
+										<div class="p-2 rounded-lg border border-themed-light flex items-center gap-2">
 											<div class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {categoryColors[cat]}"></div>
 											<div class="min-w-0">
 												<p class="text-xs text-themed-secondary truncate">{EXPENSE_CATEGORY_EMOJIS[cat]} {cat}</p>
-												<p class="text-sm font-bold font-mono text-themed">{formatBRL(amount)}</p>
+												<p class="text-sm font-semibold font-mono text-themed">{formatBRL(amount)}</p>
 											</div>
 										</div>
 									{/if}
@@ -352,7 +365,7 @@
 							</div>
 							{#if pieData.length > 0}
 								<div class="flex items-center justify-center">
-									<PieChart data={pieData} height={200} />
+									<PieChart data={pieData} height={220} />
 								</div>
 							{/if}
 						</div>
@@ -361,7 +374,7 @@
 					<!-- Income Flow Sankey -->
 					{@const sankeyData = transformToSankeyData(month)}
 					{#if sankeyData.links.length > 0}
-						<div class="mt-6 pt-6 border-t border-themed">
+						<div class="mt-6 pt-6 border-t border-themed-light">
 							<h4 class="text-sm font-semibold text-themed-secondary uppercase tracking-wide mb-4">
 								Income Flow
 							</h4>
@@ -374,11 +387,11 @@
 				<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 					<!-- Lorenzo -->
 					<div class="p-4 rounded-xl border-2 border-lorenzo/20 bg-lorenzo/5">
-						<div class="flex items-center gap-3 mb-4">
-							<Avatar name="Lorenzo" size="lg" color="lorenzo" />
+						<div class="flex items-center gap-3 mb-3">
+							<Avatar name="Lorenzo" size="md" color="lorenzo" />
 							<div>
-								<h4 class="font-semibold text-themed">Lorenzo</h4>
-								<p class="text-sm text-themed-secondary">
+								<h4 class="font-semibold text-sm text-themed">Lorenzo</h4>
+								<p class="text-xs text-themed-secondary">
 									{Math.round(month.lorenzo.sharePercent * 100)}% share
 								</p>
 							</div>
@@ -409,11 +422,11 @@
 
 					<!-- Maria -->
 					<div class="p-4 rounded-xl border-2 border-maria/20 bg-maria/5">
-						<div class="flex items-center gap-3 mb-4">
-							<Avatar name="Maria" size="lg" color="maria" />
+						<div class="flex items-center gap-3 mb-3">
+							<Avatar name="Maria" size="md" color="maria" />
 							<div>
-								<h4 class="font-semibold text-themed">Maria</h4>
-								<p class="text-sm text-themed-secondary">
+								<h4 class="font-semibold text-sm text-themed">Maria</h4>
+								<p class="text-xs text-themed-secondary">
 									{Math.round(month.maria.sharePercent * 100)}% share
 								</p>
 							</div>

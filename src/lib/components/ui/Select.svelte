@@ -49,7 +49,7 @@
       {disabled}
       {required}
       {onchange}
-      class="w-full px-3 py-2 pr-10 bg-themed border border-themed rounded-lg text-themed transition-theme focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed appearance-none cursor-pointer {error ? 'border-negative focus:ring-negative' : ''}"
+      class="w-full min-h-[44px] px-3 py-2 pr-10 bg-themed border border-themed rounded-lg text-themed text-[16px] sm:text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed appearance-none cursor-pointer {error ? 'border-negative focus:ring-negative/30' : ''}"
     >
       {#if placeholder}
         <option value="" disabled>{placeholder}</option>

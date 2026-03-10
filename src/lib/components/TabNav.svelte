@@ -37,16 +37,16 @@
   });
 </script>
 
-<nav class="bg-themed border-b border-themed transition-theme">
+<nav class="bg-themed border-b border-themed-light transition-theme">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="relative flex gap-1 overflow-x-auto scrollbar-hide -mb-px">
+    <div class="relative flex gap-1 overflow-x-auto scrollbar-hide -mb-px scroll-snap-x">
       {#each tabs as tab, i}
         <button
           bind:this={tabRefs[i]}
           onclick={() => onTabChange(tab.id)}
-          class="relative flex items-center gap-2 px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors duration-200 {activeTab === tab.id
-            ? 'text-primary'
-            : 'text-themed-secondary hover:text-themed'}"
+          class="relative flex items-center gap-2 px-4 py-3 text-sm whitespace-nowrap transition-all duration-200 rounded-t-lg scroll-snap-start cursor-pointer {activeTab === tab.id
+            ? 'text-primary font-semibold'
+            : 'text-themed-secondary font-medium hover:text-themed hover:bg-themed-tertiary/50'}"
         >
           {#if tab.id === 'lorenzo'}
             <Avatar name="Lorenzo" size="sm" color="lorenzo" />
@@ -74,7 +74,7 @@
 
       <!-- Sliding indicator -->
       <span
-        class="absolute bottom-0 h-0.5 bg-primary rounded-full transition-all duration-300 ease-out"
+        class="absolute bottom-0 h-[3px] bg-primary rounded-full transition-all duration-300 ease-out"
         style={indicatorStyle}
       ></span>
     </div>
@@ -88,5 +88,11 @@
   .scrollbar-hide {
     -ms-overflow-style: none;
     scrollbar-width: none;
+  }
+  .scroll-snap-x {
+    scroll-snap-type: x mandatory;
+  }
+  .scroll-snap-start {
+    scroll-snap-align: start;
   }
 </style>
