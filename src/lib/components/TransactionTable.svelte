@@ -317,8 +317,10 @@
 				type="text"
 				bind:value={searchInput}
 				oninput={handleSearch}
-				placeholder="Search transactions..."
-				class="w-full min-h-[44px] pl-10 pr-20 py-2.5 bg-themed-secondary border-none rounded-xl text-themed text-[16px] sm:text-sm placeholder:text-themed-tertiary transition-all focus:outline-none focus:ring-2 focus:ring-primary/30"
+				placeholder="Search transactions\u2026"
+				aria-label="Search transactions"
+				autocomplete="off"
+				class="w-full min-h-[44px] pl-10 pr-20 py-2.5 bg-themed-secondary border-none rounded-xl text-themed text-[16px] sm:text-sm placeholder:text-themed-tertiary transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
 			/>
 			<div class="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-1">
 				{#if searchInput}
@@ -590,7 +592,8 @@
 				type="text"
 				label="Amount (R$)"
 				bind:value={editModal.amount}
-				placeholder="0,00"
+				placeholder="0,00…"
+				inputmode="decimal"
 				disabled={editModal.isUpdating}
 			/>
 
@@ -598,7 +601,7 @@
 				type="text"
 				label="Description"
 				bind:value={editModal.description}
-				placeholder="What was this expense for?"
+				placeholder="What was this expense for\u2026"
 				disabled={editModal.isUpdating}
 			/>
 		</div>

@@ -90,7 +90,7 @@
 
     <!-- Error Banner -->
     {#if loadError}
-        <div class="bg-negative/10 border-b border-negative/20 px-4 py-3">
+        <div class="bg-negative/10 border-b border-negative/20 px-4 py-3" aria-live="polite">
             <div
                 class="max-w-7xl mx-auto flex items-center justify-between gap-4"
             >
@@ -105,6 +105,7 @@
                         stroke-width="2"
                         stroke-linecap="round"
                         stroke-linejoin="round"
+                        aria-hidden="true"
                     >
                         <path d="M21 2v6h-6" />
                         <path d="M3 12a9 9 0 0 1 15-6.7L21 8" />

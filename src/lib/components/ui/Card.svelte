@@ -22,7 +22,7 @@
 </script>
 
 <div
-  class="bg-themed rounded-xl shadow-themed border border-themed-light transition-all duration-300 ease-out {paddingClasses[padding]} {hover ? 'hover:shadow-themed-lg hover:-translate-y-1 cursor-pointer' : ''}"
+  class="bg-themed rounded-xl shadow-themed border border-themed-light transition-[background-color,box-shadow,border-color,transform] duration-300 ease-out {paddingClasses[padding]} {hover ? 'hover:shadow-themed-lg hover:-translate-y-1 cursor-pointer' : ''}"
 >
   {@render children()}
 </div>

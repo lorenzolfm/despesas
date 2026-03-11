@@ -14,6 +14,8 @@
     name?: string;
     oninput?: (e: Event) => void;
     onchange?: (e: Event) => void;
+    autocomplete?: string;
+    inputmode?: 'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url' | 'none';
   }
 
   let {
@@ -30,7 +32,9 @@
     id,
     name,
     oninput,
-    onchange
+    onchange,
+    autocomplete,
+    inputmode
   }: Props = $props();
 
   const inputId = $derived(id || `input-${Math.random().toString(36).slice(2, 9)}`);
@@ -57,7 +61,9 @@
     {max}
     {oninput}
     {onchange}
-    class="w-full min-h-[44px] px-3 py-2 bg-themed border border-themed rounded-lg text-themed text-[16px] sm:text-sm placeholder:text-themed-tertiary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed {error ? 'border-negative focus:ring-negative/30' : ''}"
+    {autocomplete}
+    {inputmode}
+    class="w-full min-h-[44px] px-3 py-2 bg-themed border border-themed rounded-lg text-themed text-[16px] sm:text-sm placeholder:text-themed-tertiary transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary disabled:opacity-50 disabled:cursor-not-allowed {error ? 'border-negative focus-visible:ring-negative/30' : ''}"
   />
 
   {#if error}

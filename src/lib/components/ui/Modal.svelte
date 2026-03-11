@@ -44,7 +44,7 @@
 {#if open}
   <!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
   <div
-    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in"
+    class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-fade-in overscroll-contain"
     onclick={handleBackdropClick}
     onkeydown={handleKeydown}
     role="alertdialog"
@@ -62,7 +62,7 @@
             <h3 id="modal-title" class="text-lg font-semibold text-themed">{title}</h3>
             <button
               onclick={onclose}
-              class="p-1.5 -mr-1.5 rounded-lg text-themed-tertiary hover:text-themed hover:bg-themed-tertiary transition-colors"
+              class="p-1.5 -mr-1.5 rounded-lg text-themed-tertiary hover:text-themed hover:bg-themed-tertiary transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
               aria-label="Close"
             >
               <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">

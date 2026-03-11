@@ -177,7 +177,7 @@
 
 <!-- Toast Notification -->
 {#if showToast}
-	<div class="fixed top-4 right-4 z-[60] {toastDismissing ? 'animate-toast-out' : 'animate-toast-in'}">
+	<div class="fixed top-4 right-4 z-[60] {toastDismissing ? 'animate-toast-out' : 'animate-toast-in'}" aria-live="polite">
 		<div class="flex items-center gap-3 px-4 py-3 rounded-xl bg-themed shadow-themed-lg border border-positive/20">
 			<div class="w-8 h-8 rounded-full bg-positive/10 flex items-center justify-center flex-shrink-0">
 				<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-positive" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
@@ -289,7 +289,8 @@
 						type="text"
 						label="Amount (R$)"
 						bind:value={amount}
-						placeholder="0.00"
+						placeholder="0.00…"
+						inputmode="decimal"
 						required
 					/>
 				</div>
@@ -299,7 +300,7 @@
 						type="text"
 						label="Description"
 						bind:value={description}
-						placeholder="What was this expense for?"
+						placeholder="What was this expense for\u2026"
 						required
 					/>
 
@@ -325,6 +326,7 @@
 						min="1"
 						max="48"
 						placeholder="1"
+						inputmode="numeric"
 					/>
 				</div>
 

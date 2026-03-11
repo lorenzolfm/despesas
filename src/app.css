@@ -126,11 +126,11 @@ body {
 
 /* Focus ring utility */
 .focus-ring {
-  @apply focus:outline-none focus:ring-2 focus:ring-primary/30 focus:ring-offset-2;
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2;
 }
 
 .dark .focus-ring {
-  @apply focus:ring-offset-gray-900;
+  @apply focus-visible:ring-offset-gray-900;
 }
 
 /* Scrollbar styling */
@@ -190,12 +190,10 @@ body {
 @keyframes slideUp {
   from {
     opacity: 0;
-    max-height: 0;
     transform: translateY(-8px);
   }
   to {
     opacity: 1;
-    max-height: 600px;
     transform: translateY(0);
   }
 }

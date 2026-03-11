@@ -30,6 +30,8 @@
 <div
   class="inline-flex items-center justify-center rounded-full font-semibold {sizeClasses[size]} {colorClasses[color]}"
   title={name}
+  role="img"
+  aria-label={name}
 >
   {initial}
 </div>

@@ -156,17 +156,17 @@
     </label>
   {/if}
 
-  <!-- svelte-ignore a11y_click_events_have_key_events -->
-  <div class="relative cursor-pointer" role="button" tabindex="0" onclick={toggleCalendar}>
+  <button type="button" class="relative cursor-pointer w-full text-left" onclick={toggleCalendar} aria-label="Choose date">
     <input
       type="text"
       id={inputId}
       readonly
       value={inputValue}
-      placeholder="dd/mm/aaaa"
+      placeholder="dd/mm/aaaa…"
       {disabled}
       {required}
-      class="w-full min-h-[44px] px-3 py-2 pr-10 bg-themed border border-themed rounded-lg text-themed text-[16px] sm:text-sm placeholder:text-themed-tertiary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer pointer-events-none {error ? 'border-negative focus:ring-negative/30' : ''}"
+      tabindex="-1"
+      class="w-full min-h-[44px] px-3 py-2 pr-10 bg-themed border border-themed rounded-lg text-themed text-[16px] sm:text-sm placeholder:text-themed-tertiary transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:border-primary disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer pointer-events-none {error ? 'border-negative focus-visible:ring-negative/30' : ''}"
     />
     <div class="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-themed-secondary">
       <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -176,11 +176,12 @@
         <line x1="3" y1="10" x2="21" y2="10"/>
       </svg>
     </div>
-  </div>
+  </button>
 
   {#if showCalendar && !disabled}
     <!-- svelte-ignore a11y_click_events_have_key_events -->
-    <div class="absolute z-50 mt-1 p-3 bg-themed border border-themed-light rounded-xl shadow-themed-lg min-w-[280px] animate-slide-down" role="dialog" onclick={(e) => e.stopPropagation()}>
+    <!-- svelte-ignore a11y_interactive_supports_focus -->
+    <div class="absolute z-50 mt-1 p-3 bg-themed border border-themed-light rounded-xl shadow-themed-lg min-w-[280px] animate-slide-down" role="dialog" aria-label="Choose date" onclick={(e) => e.stopPropagation()}>
       {#if view === 'days'}
         <!-- Header -->
         <div class="flex items-center justify-between mb-3">

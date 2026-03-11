@@ -168,7 +168,8 @@
 				<button
 					type="button"
 					onclick={() => selectedChartCategory = cat.key}
-					class="p-3 rounded-lg {cat.bgColor} text-left transition-all cursor-pointer {isSelected ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed' : 'hover:opacity-80'}"
+					aria-pressed={isSelected}
+					class="p-3 rounded-lg {cat.bgColor} text-left transition-[transform,box-shadow,ring] cursor-pointer {isSelected ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed' : 'hover:opacity-80'}"
 					style={isSelected ? `--tw-ring-color: ${cat.chartColor}` : ''}
 				>
 					<p class="text-xs font-medium text-themed-secondary mb-1">{cat.label}</p>
