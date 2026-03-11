@@ -25,12 +25,12 @@
 
 	// Get theme-aware colors
 	function getThemeColors() {
-		if (!browser) return { text: '#6b7280', border: '#e5e7eb' };
+		if (!browser) return { text: '#928374', border: '#d5c4a1' };
 
 		const isDark = document.documentElement.classList.contains('dark');
 		return {
-			text: isDark ? '#d1d5db' : '#374151',
-			border: isDark ? '#1f2937' : '#ffffff'
+			text: isDark ? '#bdae93' : '#504945',
+			border: isDark ? '#282828' : '#fbf1c7'
 		};
 	}
 
@@ -84,9 +84,9 @@
 						}
 					},
 					tooltip: {
-						backgroundColor: themeColors.text === '#d1d5db' ? '#1f2937' : '#fff',
-						titleColor: themeColors.text === '#d1d5db' ? '#fff' : '#111827',
-						bodyColor: themeColors.text === '#d1d5db' ? '#d1d5db' : '#374151',
+						backgroundColor: themeColors.text === '#bdae93' ? '#282828' : '#fbf1c7',
+						titleColor: themeColors.text === '#bdae93' ? '#ebdbb2' : '#3c3836',
+						bodyColor: themeColors.text === '#bdae93' ? '#bdae93' : '#504945',
 						borderColor: themeColors.border,
 						borderWidth: 1,
 						padding: 12,

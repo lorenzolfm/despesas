@@ -15,19 +15,19 @@
 		height?: number;
 	}
 
-	let { labels, data, label, color = '#6366f1', height = 200 }: Props = $props();
+	let { labels, data, label, color = '#689d6a', height = 200 }: Props = $props();
 
 	let canvas: HTMLCanvasElement;
 	let chart: Chart | null = null;
 
 	// Get theme-aware colors
 	function getThemeColors() {
-		if (!browser) return { text: '#6b7280', grid: '#e5e7eb', bg: 'rgba(99, 102, 241, 0.1)' };
+		if (!browser) return { text: '#928374', grid: '#d5c4a1', bg: 'rgba(104, 157, 106, 0.1)' };
 
 		const isDark = document.documentElement.classList.contains('dark');
 		return {
-			text: isDark ? '#9ca3af' : '#6b7280',
-			grid: isDark ? '#374151' : '#e5e7eb',
+			text: isDark ? '#a89984' : '#928374',
+			grid: isDark ? '#3c3836' : '#d5c4a1',
 			bg: color + '20'
 		};
 	}
@@ -80,9 +80,9 @@
 						display: false
 					},
 					tooltip: {
-						backgroundColor: themeColors.text === '#9ca3af' ? '#1f2937' : '#fff',
-						titleColor: themeColors.text === '#9ca3af' ? '#fff' : '#111827',
-						bodyColor: themeColors.text === '#9ca3af' ? '#d1d5db' : '#374151',
+						backgroundColor: themeColors.text === '#a89984' ? '#282828' : '#fbf1c7',
+						titleColor: themeColors.text === '#a89984' ? '#ebdbb2' : '#3c3836',
+						bodyColor: themeColors.text === '#a89984' ? '#bdae93' : '#504945',
 						borderColor: themeColors.grid,
 						borderWidth: 1,
 						padding: 12,

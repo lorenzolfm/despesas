@@ -14,19 +14,19 @@
   }: Props = $props();
 
   const variantClasses = {
-    default: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
-    rent: 'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300',
-    utilities: 'bg-amber-100 text-amber-800 dark:bg-amber-900/50 dark:text-amber-300',
-    groceries: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/50 dark:text-emerald-300',
-    transport: 'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300',
-    health: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300',
-    leisure: 'bg-pink-100 text-pink-800 dark:bg-pink-900/50 dark:text-pink-300',
-    other: 'bg-gray-100 text-gray-700 dark:bg-gray-700 dark:text-gray-300',
-    income: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
-    success: 'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300',
-    warning: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300',
-    danger: 'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300',
-    investment: 'bg-indigo-100 text-indigo-800 dark:bg-indigo-900/50 dark:text-indigo-300'
+    default: 'bg-other/15 text-other dark:bg-other/25',
+    rent: 'bg-rent/15 text-rent dark:bg-rent/25',
+    utilities: 'bg-utilities/15 text-utilities dark:bg-utilities/25',
+    groceries: 'bg-groceries/15 text-groceries dark:bg-groceries/25',
+    transport: 'bg-transport/15 text-transport dark:bg-transport/25',
+    health: 'bg-health/15 text-health dark:bg-health/25',
+    leisure: 'bg-leisure/15 text-leisure dark:bg-leisure/25',
+    other: 'bg-other/15 text-other dark:bg-other/25',
+    income: 'bg-positive/15 text-positive dark:bg-positive/25',
+    success: 'bg-positive/15 text-positive dark:bg-positive/25',
+    warning: 'bg-warning/15 text-warning dark:bg-warning/25',
+    danger: 'bg-negative/15 text-negative dark:bg-negative/25',
+    investment: 'bg-info/15 text-info dark:bg-info/25'
   };
 
   const sizeClasses = {

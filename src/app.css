@@ -3,57 +3,57 @@
 /* Custom theme colors */
 @theme {
   /* Primary brand colors */
-  --color-primary: #1CC29F;
-  --color-primary-dark: #17a085;
-  --color-primary-light: #4fd1b3;
+  --color-primary: #689d6a;
+  --color-primary-dark: #427b58;
+  --color-primary-light: #8ec07c;
 
   /* User identity colors */
-  --color-lorenzo: #5C6BC0;
-  --color-lorenzo-light: #8e99d6;
-  --color-maria: #EC407A;
-  --color-maria-light: #f48aab;
+  --color-lorenzo: #458588;
+  --color-lorenzo-light: #83a598;
+  --color-maria: #b16286;
+  --color-maria-light: #d3869b;
 
   /* Semantic colors */
-  --color-positive: #4CAF50;
-  --color-negative: #FF5722;
-  --color-warning: #FF9800;
-  --color-info: #2196F3;
+  --color-positive: #b8bb26;
+  --color-negative: #cc241d;
+  --color-warning: #d79921;
+  --color-info: #83a598;
 
   /* Expense type colors */
-  --color-rent: #7C3AED;
-  --color-utilities: #F59E0B;
-  --color-groceries: #10B981;
-  --color-transport: #3B82F6;
-  --color-health: #EF4444;
-  --color-leisure: #EC4899;
-  --color-other: #6B7280;
+  --color-rent: #b16286;
+  --color-utilities: #fabd2f;
+  --color-groceries: #b8bb26;
+  --color-transport: #83a598;
+  --color-health: #fb4934;
+  --color-leisure: #d3869b;
+  --color-other: #928374;
 }
 
 /* CSS variables for theming */
 :root {
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8f9fb;
-  --bg-tertiary: #f1f3f5;
-  --bg-elevated: #ffffff;
-  --text-primary: #111827;
-  --text-secondary: #4b5563;
-  --text-tertiary: #9ca3af;
-  --border-color: #e5e7eb;
-  --border-color-light: #f1f3f5;
-  --shadow-color: rgba(0, 0, 0, 0.05);
-  --shadow-color-lg: rgba(0, 0, 0, 0.1);
+  --bg-primary: #fbf1c7;
+  --bg-secondary: #f2e5bc;
+  --bg-tertiary: #ebdbb2;
+  --bg-elevated: #fbf1c7;
+  --text-primary: #3c3836;
+  --text-secondary: #504945;
+  --text-tertiary: #928374;
+  --border-color: #d5c4a1;
+  --border-color-light: #ebdbb2;
+  --shadow-color: rgba(0, 0, 0, 0.08);
+  --shadow-color-lg: rgba(0, 0, 0, 0.12);
 }
 
 .dark {
-  --bg-primary: #0a0f1a;
-  --bg-secondary: #111827;
-  --bg-tertiary: #1e293b;
-  --bg-elevated: #151d2e;
-  --text-primary: #f1f5f9;
-  --text-secondary: #cbd5e1;
-  --text-tertiary: #64748b;
-  --border-color: #1e293b;
-  --border-color-light: #151d2e;
+  --bg-primary: #1d2021;
+  --bg-secondary: #282828;
+  --bg-tertiary: #3c3836;
+  --bg-elevated: #32302f;
+  --text-primary: #ebdbb2;
+  --text-secondary: #bdae93;
+  --text-tertiary: #a89984;
+  --border-color: #3c3836;
+  --border-color-light: #32302f;
   --shadow-color: rgba(0, 0, 0, 0.4);
   --shadow-color-lg: rgba(0, 0, 0, 0.5);
 }
@@ -130,7 +130,7 @@ body {
 }
 
 .dark .focus-ring {
-  @apply focus-visible:ring-offset-gray-900;
+  @apply focus-visible:ring-offset-[#282828];
 }
 
 /* Scrollbar styling */

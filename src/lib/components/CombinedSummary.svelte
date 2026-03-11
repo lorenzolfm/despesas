@@ -92,28 +92,28 @@
 
 	// Category colors for charts - unique color for each category
 	const categoryColors: Record<string, string> = {
-		'Mercado': '#10b981',        // emerald
-		'Transporte': '#3b82f6',     // blue
-		'Água': '#06b6d4',           // cyan
-		'Luz': '#fbbf24',            // yellow
-		'Comida boa': '#ec4899',     // pink
-		'Filho': '#8b5cf6',          // violet
-		'Entreterimento': '#f97316', // orange
-		'Saúde': '#ef4444',          // red
-		'Casa': '#6366f1',           // indigo
-		'Educação': '#14b8a6',       // teal
-		'Subscription': '#a855f7'    // purple
+		'Mercado': '#b8bb26',        // bright green
+		'Transporte': '#83a598',     // bright blue
+		'Água': '#8ec07c',           // bright aqua
+		'Luz': '#fabd2f',            // bright yellow
+		'Comida boa': '#d3869b',     // bright purple
+		'Filho': '#d65d0e',          // orange
+		'Entreterimento': '#fe8019', // bright orange
+		'Saúde': '#fb4934',          // bright red
+		'Casa': '#458588',           // blue
+		'Educação': '#689d6a',       // aqua
+		'Subscription': '#b16286'    // purple
 	};
 
 	// Expense categories for breakdown
 	const categories = [
-		{ key: 'totalIncome', label: 'Income', color: 'text-positive', bgColor: 'bg-positive/10', chartColor: '#22c55e' },
-		{ key: 'totalCredit', label: 'Credit', color: 'text-info', bgColor: 'bg-info/10', chartColor: '#3b82f6' },
-		{ key: 'totalRevenue', label: 'Total Revenue', color: 'text-primary', bgColor: 'bg-primary/10', chartColor: '#6366f1' },
-		{ key: 'totalSplit5050', label: 'Split 50/50', color: 'text-warning', bgColor: 'bg-warning/10', chartColor: '#f59e0b' },
-		{ key: 'totalPaidForPartner', label: 'Paid for Partner', color: 'text-maria', bgColor: 'bg-maria/10', chartColor: '#ec4899' },
-		{ key: 'totalHousehold', label: 'Household', color: 'text-utilities', bgColor: 'bg-utilities/10', chartColor: '#8b5cf6' },
-		{ key: 'totalPersonal', label: 'Personal', color: 'text-themed-secondary', bgColor: 'bg-themed-tertiary', chartColor: '#6b7280' }
+		{ key: 'totalIncome', label: 'Income', color: 'text-positive', bgColor: 'bg-positive/10', chartColor: '#b8bb26' },
+		{ key: 'totalCredit', label: 'Credit', color: 'text-info', bgColor: 'bg-info/10', chartColor: '#83a598' },
+		{ key: 'totalRevenue', label: 'Total Revenue', color: 'text-primary', bgColor: 'bg-primary/10', chartColor: '#689d6a' },
+		{ key: 'totalSplit5050', label: 'Split 50/50', color: 'text-warning', bgColor: 'bg-warning/10', chartColor: '#fabd2f' },
+		{ key: 'totalPaidForPartner', label: 'Paid for Partner', color: 'text-maria', bgColor: 'bg-maria/10', chartColor: '#d3869b' },
+		{ key: 'totalHousehold', label: 'Household', color: 'text-utilities', bgColor: 'bg-utilities/10', chartColor: '#b16286' },
+		{ key: 'totalPersonal', label: 'Personal', color: 'text-themed-secondary', bgColor: 'bg-themed-tertiary', chartColor: '#928374' }
 	] as const;
 
 	// Selected category for chart (default to Income)
@@ -239,7 +239,7 @@
 				.map(([category, amount]) => ({
 					label: `${EXPENSE_CATEGORY_EMOJIS[category as ExpenseCategory]} ${category}`,
 					value: amount,
-					color: categoryColors[category] || '#6b7280'
+					color: categoryColors[category] || '#928374'
 				}))}
 			<div class="mt-6 pt-6 border-t border-themed-light">
 				<h4 class="text-sm font-semibold text-themed-secondary uppercase tracking-wide mb-4">By Category (All Time)</h4>
@@ -345,7 +345,7 @@
 						.map(([category, amount]) => ({
 							label: `${EXPENSE_CATEGORY_EMOJIS[category as ExpenseCategory]} ${category}`,
 							value: amount,
-							color: categoryColors[category] || '#6b7280'
+							color: categoryColors[category] || '#928374'
 						}))}
 					<div class="mb-6">
 						<h4 class="text-sm font-semibold text-themed-secondary uppercase tracking-wide mb-4">By Category</h4>

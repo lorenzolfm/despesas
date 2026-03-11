@@ -17,11 +17,11 @@
 
 	// Get theme-aware colors
 	function getThemeColors() {
-		if (!browser) return { text: '#6b7280', linkOpacity: 0.4 };
+		if (!browser) return { text: '#928374', linkOpacity: 0.4 };
 
 		const isDark = document.documentElement.classList.contains('dark');
 		return {
-			text: isDark ? '#d1d5db' : '#374151',
+			text: isDark ? '#bdae93' : '#504945',
 			linkOpacity: isDark ? 0.35 : 0.5
 		};
 	}

@@ -95,33 +95,33 @@
 
 	// Category colors for charts - unique color for each category
 	const categoryColors: Record<string, string> = {
-		'Mercado': '#10b981',        // emerald
-		'Transporte': '#3b82f6',     // blue
-		'Água': '#06b6d4',           // cyan
-		'Luz': '#fbbf24',            // yellow
-		'Comida boa': '#ec4899',     // pink
-		'Filho': '#8b5cf6',          // violet
-		'Entreterimento': '#f97316', // orange
-		'Saúde': '#ef4444',          // red
-		'Casa': '#6366f1',           // indigo
-		'Educação': '#14b8a6',       // teal
-		'Subscription': '#a855f7'    // purple
+		'Mercado': '#b8bb26',        // bright green
+		'Transporte': '#83a598',     // bright blue
+		'Água': '#8ec07c',           // bright aqua
+		'Luz': '#fabd2f',            // bright yellow
+		'Comida boa': '#d3869b',     // bright purple
+		'Filho': '#d65d0e',          // orange
+		'Entreterimento': '#fe8019', // bright orange
+		'Saúde': '#fb4934',          // bright red
+		'Casa': '#458588',           // blue
+		'Educação': '#689d6a',       // aqua
+		'Subscription': '#b16286'    // purple
 	};
 
 	// Categories for chart selection
 	type CategoryKey = 'income' | 'credit' | 'revenue' | 'total' | 'realSpending' | 'split5050Paid' | 'householdPaid' | 'paidForPartner' | 'personal' | 'settlement';
 
 	const chartCategories: { key: CategoryKey; label: string; chartColor: string }[] = [
-		{ key: 'income', label: 'Income', chartColor: '#22c55e' },
-		{ key: 'credit', label: 'Credit', chartColor: '#3b82f6' },
-		{ key: 'revenue', label: 'Total Revenue', chartColor: '#6366f1' },
-		{ key: 'total', label: 'Total Paid', chartColor: '#6b7280' },
-		{ key: 'realSpending', label: 'Real Spending', chartColor: '#f59e0b' },
-		{ key: 'split5050Paid', label: '50/50', chartColor: '#f59e0b' },
-		{ key: 'householdPaid', label: 'Household', chartColor: '#8b5cf6' },
-		{ key: 'paidForPartner', label: 'Paid for Partner', chartColor: '#ec4899' },
-		{ key: 'personal', label: 'Personal', chartColor: '#6b7280' },
-		{ key: 'settlement', label: 'Settlement', chartColor: '#ef4444' }
+		{ key: 'income', label: 'Income', chartColor: '#b8bb26' },
+		{ key: 'credit', label: 'Credit', chartColor: '#83a598' },
+		{ key: 'revenue', label: 'Total Revenue', chartColor: '#689d6a' },
+		{ key: 'total', label: 'Total Paid', chartColor: '#928374' },
+		{ key: 'realSpending', label: 'Real Spending', chartColor: '#d79921' },
+		{ key: 'split5050Paid', label: '50/50', chartColor: '#fabd2f' },
+		{ key: 'householdPaid', label: 'Household', chartColor: '#b16286' },
+		{ key: 'paidForPartner', label: 'Paid for Partner', chartColor: '#d3869b' },
+		{ key: 'personal', label: 'Personal', chartColor: '#928374' },
+		{ key: 'settlement', label: 'Settlement', chartColor: '#fb4934' }
 	];
 
 	// Selected category for chart (default to Income)
@@ -172,7 +172,7 @@
 				type="button"
 				onclick={() => selectedChartCategory = 'income'}
 				aria-pressed={selectedChartCategory === 'income'}
-				class="p-3 rounded-lg bg-positive/10 text-left transition-[transform,box-shadow,ring] cursor-pointer {selectedChartCategory === 'income' ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed ring-[#22c55e]' : 'hover:opacity-80'}"
+				class="p-3 rounded-lg bg-positive/10 text-left transition-[transform,box-shadow,ring] cursor-pointer {selectedChartCategory === 'income' ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed ring-[#b8bb26]' : 'hover:opacity-80'}"
 			>
 				<p class="text-xs font-medium text-themed-secondary mb-1">Total Income</p>
 				<p class="text-base font-semibold font-mono text-positive">{formatBRL(aggregatedTotals.income)}</p>
@@ -181,7 +181,7 @@
 				type="button"
 				onclick={() => selectedChartCategory = 'credit'}
 				aria-pressed={selectedChartCategory === 'credit'}
-				class="p-3 rounded-lg bg-info/10 text-left transition-[transform,box-shadow,ring] cursor-pointer {selectedChartCategory === 'credit' ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed ring-[#3b82f6]' : 'hover:opacity-80'}"
+				class="p-3 rounded-lg bg-info/10 text-left transition-[transform,box-shadow,ring] cursor-pointer {selectedChartCategory === 'credit' ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed ring-[#83a598]' : 'hover:opacity-80'}"
 			>
 				<p class="text-xs font-medium text-themed-secondary mb-1">Total Credit</p>
 				<p class="text-base font-semibold font-mono text-info">{formatBRL(aggregatedTotals.credit)}</p>
@@ -190,7 +190,7 @@
 				type="button"
 				onclick={() => selectedChartCategory = 'revenue'}
 				aria-pressed={selectedChartCategory === 'revenue'}
-				class="p-3 rounded-lg bg-primary/10 text-left transition-[transform,box-shadow,ring] cursor-pointer {selectedChartCategory === 'revenue' ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed ring-[#6366f1]' : 'hover:opacity-80'}"
+				class="p-3 rounded-lg bg-primary/10 text-left transition-[transform,box-shadow,ring] cursor-pointer {selectedChartCategory === 'revenue' ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed ring-[#689d6a]' : 'hover:opacity-80'}"
 			>
 				<p class="text-xs font-medium text-themed-secondary mb-1">Total Revenue</p>
 				<p class="text-base font-semibold font-mono text-primary">{formatBRL(aggregatedTotals.revenue)}</p>
@@ -199,7 +199,7 @@
 				type="button"
 				onclick={() => selectedChartCategory = 'total'}
 				aria-pressed={selectedChartCategory === 'total'}
-				class="p-3 rounded-lg bg-themed-tertiary text-left transition-[transform,box-shadow,ring] cursor-pointer {selectedChartCategory === 'total' ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed ring-[#6b7280]' : 'hover:opacity-80'}"
+				class="p-3 rounded-lg bg-themed-tertiary text-left transition-[transform,box-shadow,ring] cursor-pointer {selectedChartCategory === 'total' ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed ring-[#928374]' : 'hover:opacity-80'}"
 			>
 				<p class="text-xs font-medium text-themed-secondary mb-1">Total Paid</p>
 				<p class="text-base font-semibold font-mono text-themed">{formatBRL(aggregatedTotals.total)}</p>
@@ -208,7 +208,7 @@
 				type="button"
 				onclick={() => selectedChartCategory = 'realSpending'}
 				aria-pressed={selectedChartCategory === 'realSpending'}
-				class="p-3 rounded-lg bg-warning/10 text-left transition-[transform,box-shadow,ring] cursor-pointer {selectedChartCategory === 'realSpending' ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed ring-[#f59e0b]' : 'hover:opacity-80'}"
+				class="p-3 rounded-lg bg-warning/10 text-left transition-[transform,box-shadow,ring] cursor-pointer {selectedChartCategory === 'realSpending' ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed ring-[#fabd2f]' : 'hover:opacity-80'}"
 			>
 				<p class="text-xs font-medium text-themed-secondary mb-1">Real Spending</p>
 				<p class="text-base font-semibold font-mono text-warning">{formatBRL(aggregatedTotals.realSpending)}</p>
@@ -229,7 +229,7 @@
 					type="button"
 					onclick={() => selectedChartCategory = 'split5050Paid'}
 					aria-pressed={selectedChartCategory === 'split5050Paid'}
-					class="p-3 rounded-lg border border-themed-light text-left transition-[transform,box-shadow,ring] cursor-pointer {selectedChartCategory === 'split5050Paid' ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed ring-[#f59e0b]' : 'hover:opacity-80'}"
+					class="p-3 rounded-lg border border-themed-light text-left transition-[transform,box-shadow,ring] cursor-pointer {selectedChartCategory === 'split5050Paid' ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed ring-[#fabd2f]' : 'hover:opacity-80'}"
 				>
 					<div class="flex items-center gap-2 mb-2">
 						<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -244,7 +244,7 @@
 					type="button"
 					onclick={() => selectedChartCategory = 'householdPaid'}
 					aria-pressed={selectedChartCategory === 'householdPaid'}
-					class="p-3 rounded-lg border border-themed-light text-left transition-[transform,box-shadow,ring] cursor-pointer {selectedChartCategory === 'householdPaid' ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed ring-[#8b5cf6]' : 'hover:opacity-80'}"
+					class="p-3 rounded-lg border border-themed-light text-left transition-[transform,box-shadow,ring] cursor-pointer {selectedChartCategory === 'householdPaid' ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed ring-[#b16286]' : 'hover:opacity-80'}"
 				>
 					<div class="flex items-center gap-2 mb-2">
 						<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-utilities" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -259,7 +259,7 @@
 					type="button"
 					onclick={() => selectedChartCategory = 'paidForPartner'}
 					aria-pressed={selectedChartCategory === 'paidForPartner'}
-					class="p-3 rounded-lg border border-themed-light text-left transition-[transform,box-shadow,ring] cursor-pointer {selectedChartCategory === 'paidForPartner' ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed ring-[#ec4899]' : 'hover:opacity-80'}"
+					class="p-3 rounded-lg border border-themed-light text-left transition-[transform,box-shadow,ring] cursor-pointer {selectedChartCategory === 'paidForPartner' ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed ring-[#d3869b]' : 'hover:opacity-80'}"
 				>
 					<div class="flex items-center gap-2 mb-2">
 						<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-maria" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -273,7 +273,7 @@
 					type="button"
 					onclick={() => selectedChartCategory = 'personal'}
 					aria-pressed={selectedChartCategory === 'personal'}
-					class="p-3 rounded-lg border border-themed-light text-left transition-[transform,box-shadow,ring] cursor-pointer {selectedChartCategory === 'personal' ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed ring-[#6b7280]' : 'hover:opacity-80'}"
+					class="p-3 rounded-lg border border-themed-light text-left transition-[transform,box-shadow,ring] cursor-pointer {selectedChartCategory === 'personal' ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed ring-[#928374]' : 'hover:opacity-80'}"
 				>
 					<div class="flex items-center gap-2 mb-2">
 						<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-themed-secondary" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -288,7 +288,7 @@
 					type="button"
 					onclick={() => selectedChartCategory = 'settlement'}
 					aria-pressed={selectedChartCategory === 'settlement'}
-					class="p-3 rounded-lg border border-themed-light text-left transition-[transform,box-shadow,ring] cursor-pointer {selectedChartCategory === 'settlement' ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed ring-[#ef4444]' : 'hover:opacity-80'}"
+					class="p-3 rounded-lg border border-themed-light text-left transition-[transform,box-shadow,ring] cursor-pointer {selectedChartCategory === 'settlement' ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed ring-[#fb4934]' : 'hover:opacity-80'}"
 				>
 					<div class="flex items-center gap-2 mb-2">
 						<svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-rent" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -309,7 +309,7 @@
 				.map(([category, amount]) => ({
 					label: `${EXPENSE_CATEGORY_EMOJIS[category as ExpenseCategory]} ${category}`,
 					value: amount,
-					color: categoryColors[category] || '#6b7280'
+					color: categoryColors[category] || '#928374'
 				}))}
 			<div class="mt-6 pt-6 border-t border-themed-light">
 				<h4 class="text-sm font-semibold text-themed-secondary uppercase tracking-wide mb-4">By Expense Category (All Time)</h4>
@@ -509,7 +509,7 @@
 						.map(([category, amount]) => ({
 							label: `${EXPENSE_CATEGORY_EMOJIS[category as ExpenseCategory]} ${category}`,
 							value: amount,
-							color: categoryColors[category] || '#6b7280'
+							color: categoryColors[category] || '#928374'
 						}))}
 					<div class="mt-6 space-y-4">
 						<h4 class="text-sm font-semibold text-themed-secondary uppercase tracking-wide">By Expense Category</h4>

@@ -19,17 +19,17 @@ export interface SankeyData {
 
 // Category colors - unique color for each category
 const categoryColors: Record<string, string> = {
-	'Mercado': '#10b981',        // emerald
-	'Transporte': '#3b82f6',     // blue
-	'Água': '#06b6d4',           // cyan
-	'Luz': '#fbbf24',            // yellow
-	'Comida boa': '#ec4899',     // pink
-	'Filho': '#8b5cf6',          // violet
-	'Entreterimento': '#f97316', // orange
-	'Saúde': '#ef4444',          // red
-	'Casa': '#6366f1',           // indigo
-	'Educação': '#14b8a6',       // teal
-	'Subscription': '#a855f7'    // purple
+	'Mercado': '#b8bb26',        // bright green
+	'Transporte': '#83a598',     // bright blue
+	'Água': '#8ec07c',           // bright aqua
+	'Luz': '#fabd2f',            // bright yellow
+	'Comida boa': '#d3869b',     // bright purple
+	'Filho': '#d65d0e',          // orange
+	'Entreterimento': '#fe8019', // bright orange
+	'Saúde': '#fb4934',          // bright red
+	'Casa': '#458588',           // blue
+	'Educação': '#689d6a',       // aqua
+	'Subscription': '#b16286'    // purple
 };
 
 export function transformToSankeyData(monthData: CombinedMonthlyTotals): SankeyData {
@@ -40,7 +40,7 @@ export function transformToSankeyData(monthData: CombinedMonthlyTotals): SankeyD
 	nodes.push({
 		id: 'income',
 		name: 'Income',
-		color: '#22c55e'
+		color: '#b8bb26'
 	});
 
 	// Add category nodes and links for categories with values > 0
@@ -49,7 +49,7 @@ export function transformToSankeyData(monthData: CombinedMonthlyTotals): SankeyD
 			nodes.push({
 				id: `cat-${category}`,
 				name: category,
-				color: categoryColors[category] || '#6b7280'
+				color: categoryColors[category] || '#928374'
 			});
 
 			links.push({
@@ -68,7 +68,7 @@ export function transformToSankeyData(monthData: CombinedMonthlyTotals): SankeyD
 		nodes.push({
 			id: 'uncategorized',
 			name: 'Other',
-			color: '#9ca3af'
+			color: '#928374'
 		});
 		links.push({
 			source: 'income',
@@ -91,7 +91,7 @@ export function transformPersonToSankeyData(personData: PersonMonthlyTotals): Sa
 	nodes.push({
 		id: 'income',
 		name: 'Income',
-		color: '#22c55e'
+		color: '#b8bb26'
 	});
 
 	// Add category nodes and links for categories with values > 0
@@ -100,7 +100,7 @@ export function transformPersonToSankeyData(personData: PersonMonthlyTotals): Sa
 			nodes.push({
 				id: `cat-${category}`,
 				name: category,
-				color: categoryColors[category] || '#6b7280'
+				color: categoryColors[category] || '#928374'
 			});
 
 			links.push({
@@ -119,7 +119,7 @@ export function transformPersonToSankeyData(personData: PersonMonthlyTotals): Sa
 		nodes.push({
 			id: 'uncategorized',
 			name: 'Other',
-			color: '#9ca3af'
+			color: '#928374'
 		});
 		links.push({
 			source: 'income',

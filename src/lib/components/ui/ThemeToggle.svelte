@@ -38,7 +38,7 @@
 
 <button
   onclick={toggleTheme}
-  class="p-2 rounded-lg bg-themed-tertiary hover:bg-themed-secondary text-themed-secondary hover:text-themed transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 cursor-pointer"
+  class="p-2 rounded-lg bg-themed-tertiary hover:bg-themed-secondary text-themed-secondary hover:text-themed transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-[#282828] cursor-pointer"
   aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
 >
   <div class="transition-transform duration-500 {isRotating ? 'rotate-[360deg]' : ''}">
