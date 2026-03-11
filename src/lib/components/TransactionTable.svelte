@@ -317,7 +317,7 @@
 				type="text"
 				bind:value={searchInput}
 				oninput={handleSearch}
-				placeholder="Search transactions\u2026"
+				placeholder="Search transactions…"
 				aria-label="Search transactions"
 				autocomplete="off"
 				class="w-full min-h-[44px] pl-10 pr-20 py-2.5 bg-themed-secondary border-none rounded-xl text-themed text-[16px] sm:text-sm placeholder:text-themed-tertiary transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
@@ -601,7 +601,7 @@
 				type="text"
 				label="Description"
 				bind:value={editModal.description}
-				placeholder="What was this expense for\u2026"
+				placeholder="What was this expense for…"
 				disabled={editModal.isUpdating}
 			/>
 		</div>
