@@ -50,7 +50,6 @@
 	const showInstallmentPreview = $derived(installments > 1);
 
 	const ownerOptions = OWNERS.map((o) => ({ value: o, label: o }));
-	const typeOptions = EXPENSE_TYPES.map((t) => ({ value: t, label: `${EXPENSE_TYPE_EMOJIS[t]} ${t}` }));
 	const categoryOptions = [
 		{ value: '', label: 'No category' },
 		...EXPENSE_CATEGORIES.map((c) => ({ value: c, label: `${EXPENSE_CATEGORY_EMOJIS[c]} ${c}` }))
@@ -255,7 +254,7 @@
 			{/if}
 
 			<form onsubmit={handleSubmit} class="space-y-4">
-				<!-- Owner Selection -->
+				<!-- 1. Owner Selection -->
 				<fieldset>
 					<legend class="block text-sm font-medium text-themed-secondary mb-2">Who paid?</legend>
 					<div class="flex gap-2">
@@ -277,14 +276,36 @@
 					</div>
 				</fieldset>
 
-				<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-					<Select
-						label="Type"
-						bind:value={type}
-						options={typeOptions}
-						required
-					/>
+				<!-- 2. Type — pill buttons -->
+				<fieldset>
+					<legend class="block text-sm font-medium text-themed-secondary mb-2">Type</legend>
+					<div class="flex flex-wrap gap-2">
+						{#each EXPENSE_TYPES as t}
+							<button
+								type="button"
+								onclick={() => (type = t)}
+								disabled={isSubmitting}
+								class="px-3 py-1.5 rounded-lg border text-sm cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed {type === t
+									? 'bg-primary text-white border-primary'
+									: 'border-themed bg-themed text-themed hover:border-primary/40'}"
+							>
+								{EXPENSE_TYPE_EMOJIS[t]} {t}
+							</button>
+						{/each}
+					</div>
+				</fieldset>
 
+				<!-- 3. Description — full width -->
+				<Input
+					type="text"
+					label="Description"
+					bind:value={description}
+					placeholder="What was this expense for…"
+					required
+				/>
+
+				<!-- 4. Amount / Date / Installments — compact row -->
+				<div class="grid grid-cols-[1fr_4rem] sm:grid-cols-[1fr_auto_5rem] gap-3">
 					<Input
 						type="text"
 						label="Amount (R$)"
@@ -293,31 +314,15 @@
 						inputmode="decimal"
 						required
 					/>
-				</div>
 
-				<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-					<Input
-						type="text"
-						label="Description"
-						bind:value={description}
-						placeholder="What was this expense for\u2026"
-						required
-					/>
-
-					<Select
-						label="Category"
-						bind:value={category}
-						options={categoryOptions}
-					/>
-				</div>
-
-				<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-					<DatePicker
-						label="Date"
-						bind:value={date}
-						disabled={isSubmitting}
-						required
-					/>
+					<div class="col-span-2 sm:col-span-1">
+						<DatePicker
+							label="Date"
+							bind:value={date}
+							disabled={isSubmitting}
+							required
+						/>
+					</div>
 
 					<Input
 						type="number"
@@ -330,6 +335,14 @@
 					/>
 				</div>
 
+				<!-- 5. Category — dropdown -->
+				<Select
+					label="Category"
+					bind:value={category}
+					options={categoryOptions}
+				/>
+
+				<!-- 6. Installment preview -->
 				{#if showInstallmentPreview}
 					<div class="p-3 rounded-lg bg-primary/5 border border-primary/20">
 						<p class="text-sm text-themed-secondary">
@@ -340,6 +353,7 @@
 					</div>
 				{/if}
 
+				<!-- 7. Submit button -->
 				<div class="pt-1">
 					<Button type="submit" fullWidth disabled={isSubmitting}>
 						{#if isSubmitting}
