@@ -7,6 +7,7 @@ import { env } from '$env/dynamic/private';
 const ALLOWED_EMAILS = (env.ALLOWED_EMAILS ?? '').split(',').map((e) => e.trim()).filter(Boolean);
 
 const { handle: authHandle } = SvelteKitAuth({
+    trustHost: true,
     providers: [Google],
     callbacks: {
         signIn({ profile }) {
