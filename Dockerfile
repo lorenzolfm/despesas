@@ -15,5 +15,5 @@ COPY --from=builder /app/package.json ./
 COPY --from=builder /app/node_modules ./node_modules
 USER sveltekit
 EXPOSE 3000
-ENV NODE_ENV=production PORT=3000 HOST=0.0.0.0
+ENV NODE_ENV=production PORT=3000 HOST=0.0.0.0 AUTH_TRUST_HOST=true
 CMD ["node", "build"]
