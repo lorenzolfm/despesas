@@ -90,7 +90,10 @@
 
     <!-- Error Banner -->
     {#if loadError}
-        <div class="bg-negative/10 border-b border-negative/20 px-4 py-3" aria-live="polite">
+        <div
+            class="bg-negative/10 border-b border-negative/20 px-4 py-3"
+            aria-live="polite"
+        >
             <div
                 class="max-w-7xl mx-auto flex items-center justify-between gap-4"
             >
@@ -127,7 +130,9 @@
             <!-- Loading Skeleton -->
             <div class="space-y-4">
                 <!-- Balance hero skeleton -->
-                <div class="bg-themed rounded-xl border border-themed-light overflow-hidden">
+                <div
+                    class="bg-themed rounded-xl border border-themed-light overflow-hidden"
+                >
                     <div class="h-1 skeleton"></div>
                     <div class="p-6 flex flex-col items-center gap-3">
                         <div class="w-14 h-14 rounded-full skeleton"></div>
@@ -139,13 +144,17 @@
                 <!-- Form button skeleton -->
                 <div class="h-12 skeleton rounded-xl"></div>
                 <!-- Transaction list skeleton -->
-                <div class="bg-themed rounded-xl border border-themed-light overflow-hidden">
+                <div
+                    class="bg-themed rounded-xl border border-themed-light overflow-hidden"
+                >
                     <div class="p-4 border-b border-themed-light">
                         <div class="h-11 skeleton rounded-xl"></div>
                     </div>
                     {#each Array(4) as _}
                         <div class="px-4 py-3 flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-full skeleton flex-shrink-0"></div>
+                            <div
+                                class="w-8 h-8 rounded-full skeleton flex-shrink-0"
+                            ></div>
                             <div class="flex-1 space-y-2">
                                 <div class="h-4 w-3/4 skeleton"></div>
                                 <div class="h-3 w-1/3 skeleton"></div>
@@ -161,7 +170,9 @@
                     {#if activeTab === "transactions"}
                         <div class="space-y-4 stagger-children">
                             <!-- Balance Hero -->
-                            <BalanceHero monthlyTotals={expenses.monthlyTotals} />
+                            <BalanceHero
+                                monthlyTotals={expenses.monthlyTotals}
+                            />
 
                             <!-- Add Transaction Section -->
                             <ExpenseForm onSuccess={fetchTransactions} />
@@ -174,7 +185,9 @@
                         </div>
                     {:else if activeTab === "summary"}
                         <div class="space-y-4 animate-fade-in">
-                            <BalanceHero monthlyTotals={expenses.monthlyTotals} />
+                            <BalanceHero
+                                monthlyTotals={expenses.monthlyTotals}
+                            />
                             <CombinedSummary />
                         </div>
                     {:else if activeTab === "lorenzo"}

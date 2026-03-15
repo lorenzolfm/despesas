@@ -1,4 +1,4 @@
-import type { Session } from '@auth/sveltekit';
+import type { Session } from "@auth/sveltekit";
 
 declare global {
     namespace App {
@@ -14,4 +14,4 @@ declare global {
     }
 }
 
-export { };
+export {};
