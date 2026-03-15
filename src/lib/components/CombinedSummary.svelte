@@ -73,6 +73,30 @@
         ),
     );
 
+    // Get previous month data (for MoM badges)
+    const previousMonthData = $derived.by(() => {
+        if (!selectedMonthData) {
+            return undefined;
+        }
+        const { year, month } = selectedMonthData.monthKey;
+        const prevKey =
+            month === 0
+                ? { year: year - 1, month: 11 }
+                : { year, month: month - 1 };
+        return allMonthlyTotals.find(
+            (m) =>
+                m.monthKey.year === prevKey.year &&
+                m.monthKey.month === prevKey.month,
+        );
+    });
+
+    function calcPctChange(current: number, previous: number): number | null {
+        if (previous === 0) {
+            return null;
+        }
+        return ((current - previous) / previous) * 100;
+    }
+
     // Calculate aggregated totals across all months up to current
     const aggregatedTotals = $derived.by(() => {
         const totalIncome = monthlyTotalsUpToCurrent.reduce(
@@ -407,7 +431,33 @@
                                 cat.key === "totalRevenue"
                                     ? month.totalIncome + month.totalCredit
                                     : month[cat.key]}
-                            <div class="p-3 rounded-lg {cat.bgColor}">
+                            {@const prevValue = previousMonthData
+                                ? cat.key === "totalRevenue"
+                                    ? previousMonthData.totalIncome +
+                                      previousMonthData.totalCredit
+                                    : previousMonthData[cat.key]
+                                : undefined}
+                            <div class="relative p-3 rounded-lg {cat.bgColor}">
+                                {#if prevValue !== undefined}
+                                    {@const pct = calcPctChange(
+                                        value,
+                                        prevValue,
+                                    )}
+                                    {#if pct !== null}
+                                        <span
+                                            class="absolute top-1.5 right-1.5 text-[10px] font-semibold px-1 py-0.5 rounded {pct >
+                                            0
+                                                ? 'text-red-400 bg-red-400/15'
+                                                : pct < 0
+                                                  ? 'text-green-400 bg-green-400/15'
+                                                  : 'text-themed-tertiary bg-themed-tertiary/30'}"
+                                        >
+                                            {pct > 0 ? "+" : ""}{Math.round(
+                                                pct,
+                                            )}%
+                                        </span>
+                                    {/if}
+                                {/if}
                                 <p
                                     class="text-xs font-medium text-themed-secondary mb-1"
                                 >
@@ -424,8 +474,26 @@
 
                     <!-- Total -->
                     <div
-                        class="p-4 rounded-lg bg-themed-secondary flex items-center justify-between mb-6"
+                        class="relative p-4 rounded-lg bg-themed-secondary flex items-center justify-between mb-6"
                     >
+                        {#if previousMonthData}
+                            {@const pct = calcPctChange(
+                                month.grandTotal,
+                                previousMonthData.grandTotal,
+                            )}
+                            {#if pct !== null}
+                                <span
+                                    class="absolute top-1.5 right-1.5 text-[10px] font-semibold px-1 py-0.5 rounded {pct >
+                                    0
+                                        ? 'text-red-400 bg-red-400/15'
+                                        : pct < 0
+                                          ? 'text-green-400 bg-green-400/15'
+                                          : 'text-themed-tertiary bg-themed-tertiary/30'}"
+                                >
+                                    {pct > 0 ? "+" : ""}{Math.round(pct)}%
+                                </span>
+                            {/if}
+                        {/if}
                         <span class="font-medium text-themed"
                             >Total Expenses</span
                         >
@@ -457,8 +525,35 @@
                                             month.categoryTotals[cat] || 0}
                                         {#if amount > 0}
                                             <div
-                                                class="p-2 rounded-lg border border-themed-light flex items-center gap-2"
+                                                class="relative p-2 rounded-lg border border-themed-light flex items-center gap-2"
                                             >
+                                                {#if previousMonthData}
+                                                    {@const prevAmt =
+                                                        previousMonthData
+                                                            .categoryTotals[
+                                                            cat
+                                                        ] || 0}
+                                                    {@const pct = calcPctChange(
+                                                        amount,
+                                                        prevAmt,
+                                                    )}
+                                                    {#if pct !== null}
+                                                        <span
+                                                            class="absolute top-1 right-1 text-[9px] font-semibold px-1 py-0.5 rounded {pct >
+                                                            0
+                                                                ? 'text-red-400 bg-red-400/15'
+                                                                : pct < 0
+                                                                  ? 'text-green-400 bg-green-400/15'
+                                                                  : 'text-themed-tertiary bg-themed-tertiary/30'}"
+                                                        >
+                                                            {pct > 0
+                                                                ? "+"
+                                                                : ""}{Math.round(
+                                                                pct,
+                                                            )}%
+                                                        </span>
+                                                    {/if}
+                                                {/if}
                                                 <div
                                                     class="w-3 h-3 rounded-full flex-shrink-0"
                                                     style="background-color: {categoryColors[
