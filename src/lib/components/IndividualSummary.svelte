@@ -153,7 +153,7 @@
 		<div class="flex items-center gap-4 mb-6">
 			<Avatar name={owner} size="xl" color={ownerColor} />
 			<div class="flex-1">
-				<h2 class="text-xl font-semibold text-themed">{owner}\u2019s Summary</h2>
+				<h2 class="text-xl font-semibold text-themed">{owner}'s Summary</h2>
 				<p class="text-sm text-themed-secondary">Personal breakdown and debt calculation</p>
 			</div>
 			{#if aggregatedTotals.debt !== 0}
@@ -365,7 +365,7 @@
 					</svg>
 				</div>
 				<h3 class="text-base font-semibold text-themed mb-1">No transactions yet</h3>
-				<p class="text-sm text-themed-secondary">Add transactions to see {owner}\u2019s summary</p>
+				<p class="text-sm text-themed-secondary">Add transactions to see {owner}'s summary</p>
 			</div>
 		</Card>
 	{:else}
