@@ -2,7 +2,7 @@
     import { browser } from "$app/environment";
     import * as d3 from "d3";
     import { sankey, sankeyLinkHorizontal } from "d3-sankey";
-    import type { SankeyData, SankeyNode, SankeyLink } from "$lib/utils/sankey";
+    import type { SankeyData, SankeyLink, SankeyNode } from "$lib/utils/sankey";
     import { formatBRL } from "$lib/utils/format";
 
     interface Props {
@@ -17,7 +17,9 @@
 
     // Get theme-aware colors
     function getThemeColors() {
-        if (!browser) return { text: "#928374", linkOpacity: 0.4 };
+        if (!browser) {
+            return { text: "#928374", linkOpacity: 0.4 };
+        }
 
         const isDark = document.documentElement.classList.contains("dark");
         return {
@@ -33,8 +35,9 @@
             !container ||
             data.nodes.length === 0 ||
             data.links.length === 0
-        )
+        ) {
             return;
+        }
 
         const themeColors = getThemeColors();
         const width = container.clientWidth;
@@ -46,8 +49,6 @@
         d3.select(svg).selectAll("*").remove();
 
         // Build node map for sankey
-        const nodeMap = new Map(data.nodes.map((n) => [n.id, { ...n }]));
-
         // Create sankey layout
         const sankeyGenerator = sankey<SankeyNode, SankeyLink>()
             .nodeId((d) => d.id)
@@ -184,7 +185,9 @@
 
     // Watch for theme changes
     $effect(() => {
-        if (!browser) return;
+        if (!browser) {
+            return;
+        }
 
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
@@ -201,7 +204,9 @@
 
     // Handle resize
     $effect(() => {
-        if (!browser || !container) return;
+        if (!browser || !container) {
+            return;
+        }
 
         const resizeObserver = new ResizeObserver(() => {
             renderSankey();

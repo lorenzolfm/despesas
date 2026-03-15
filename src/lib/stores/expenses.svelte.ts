@@ -1,4 +1,4 @@
-import type { Transaction, CombinedMonthlyTotals } from "$lib/types";
+import type { CombinedMonthlyTotals, Transaction } from "$lib/types";
 import { calculateAllMonthlyTotals } from "$lib/utils/calculations";
 
 // Reactive state

@@ -1,9 +1,9 @@
 import type {
-    Transaction,
-    Owner,
-    MonthKey,
-    PersonMonthlyTotals,
     CombinedMonthlyTotals,
+    MonthKey,
+    Owner,
+    PersonMonthlyTotals,
+    Transaction,
 } from "$lib/types";
 import { getMonthKey, monthKeyToString } from "./format";
 
@@ -33,8 +33,12 @@ export function filterTransactions(
     type?: Transaction["type"],
 ): Transaction[] {
     return transactions.filter((tx) => {
-        if (owner && tx.owner !== owner) return false;
-        if (type && tx.type !== type) return false;
+        if (owner && tx.owner !== owner) {
+            return false;
+        }
+        if (type && tx.type !== type) {
+            return false;
+        }
         return true;
     });
 }

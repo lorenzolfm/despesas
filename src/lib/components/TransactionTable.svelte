@@ -6,27 +6,27 @@
         groupTransactionsByDate,
     } from "$lib/utils/format";
     import {
-        Card,
         Avatar,
         Badge,
         Button,
+        Card,
+        DatePicker,
         Input,
         Modal,
         Select,
-        DatePicker,
     } from "$lib/components/ui";
     import type {
-        ExpenseType,
         ExpenseCategory,
-        Transaction,
+        ExpenseType,
         Owner,
+        Transaction,
     } from "$lib/types";
     import {
-        EXPENSE_TYPES,
         EXPENSE_CATEGORIES,
-        OWNERS,
-        EXPENSE_TYPE_EMOJIS,
         EXPENSE_CATEGORY_EMOJIS,
+        EXPENSE_TYPES,
+        EXPENSE_TYPE_EMOJIS,
+        OWNERS,
     } from "$lib/types";
 
     interface Props {
@@ -116,7 +116,8 @@
         ...OWNERS.map((o) => ({ value: o, label: o })),
     ];
 
-    // Get today's date at midnight for comparison
+    // Get today's date at end of day for comparison
+    // eslint-disable-next-line svelte/prefer-svelte-reactivity -- not reactive state, computed once
     const today = new Date();
     today.setHours(23, 59, 59, 999);
 
@@ -147,10 +148,11 @@
         return filtered;
     });
 
-    const futureTransactionsCount = $derived(() => {
-        return expenses.filteredTransactions.filter((tx) => tx.date > today)
-            .length;
-    });
+    const futureTransactionsCount = $derived(
+        () =>
+            expenses.filteredTransactions.filter((tx) => tx.date > today)
+                .length,
+    );
 
     function handleSearch() {
         expenses.setSearchQuery(searchInput);
@@ -192,7 +194,9 @@
     }
 
     async function confirmDelete() {
-        if (!deleteModal.transaction) return;
+        if (!deleteModal.transaction) {
+            return;
+        }
 
         deleteModal.isDeleting = true;
         deleteModal.error = "";
@@ -258,7 +262,9 @@
     }
 
     async function confirmEdit() {
-        if (!editModal.originalTransaction) return;
+        if (!editModal.originalTransaction) {
+            return;
+        }
 
         // Validation
         if (!editModal.description.trim()) {
@@ -600,7 +606,7 @@
         </div>
     {:else}
         <div class="divide-y divide-themed-light">
-            {#each groupedTransactions() as group}
+            {#each groupedTransactions() as group (group.date)}
                 <!-- Date Group Header -->
                 <div
                     class="sticky top-0 z-10 px-4 py-2 bg-themed-secondary/95 backdrop-blur-sm border-b border-themed-light"
@@ -777,7 +783,7 @@
                 >Who paid?</legend
             >
             <div class="flex gap-2">
-                {#each OWNERS as o}
+                {#each OWNERS as o (o)}
                     <button
                         type="button"
                         onclick={() => (editModal.owner = o)}

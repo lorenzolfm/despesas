@@ -1,8 +1,8 @@
 import type {
-    Transaction,
-    Owner,
-    ExpenseType,
     ExpenseCategory,
+    ExpenseType,
+    Owner,
+    Transaction,
 } from "$lib/types";
 import { EXPENSE_CATEGORIES } from "$lib/types";
 import { parseBRL, parseDateBR } from "./format";

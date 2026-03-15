@@ -4,6 +4,17 @@
     let isDark = $state(false);
     let isRotating = $state(false);
 
+    function updateTheme() {
+        if (browser) {
+            if (isDark) {
+                document.documentElement.classList.add("dark");
+            } else {
+                document.documentElement.classList.remove("dark");
+            }
+            localStorage.setItem("theme", isDark ? "dark" : "light");
+        }
+    }
+
     // Initialize theme from localStorage or system preference
     $effect(() => {
         if (browser) {
@@ -18,17 +29,6 @@
             updateTheme();
         }
     });
-
-    function updateTheme() {
-        if (browser) {
-            if (isDark) {
-                document.documentElement.classList.add("dark");
-            } else {
-                document.documentElement.classList.remove("dark");
-            }
-            localStorage.setItem("theme", isDark ? "dark" : "light");
-        }
-    }
 
     function toggleTheme() {
         isRotating = true;

@@ -25,7 +25,9 @@
 
     // Get theme-aware colors
     function getThemeColors() {
-        if (!browser) return { text: "#928374", border: "#d5c4a1" };
+        if (!browser) {
+            return { text: "#928374", border: "#d5c4a1" };
+        }
 
         const isDark = document.documentElement.classList.contains("dark");
         return {
@@ -35,10 +37,14 @@
     }
 
     function createChart() {
-        if (!browser || !canvas) return;
+        if (!browser || !canvas) {
+            return;
+        }
 
         const ctx = canvas.getContext("2d");
-        if (!ctx) return;
+        if (!ctx) {
+            return;
+        }
 
         const themeColors = getThemeColors();
 
@@ -128,7 +134,9 @@
 
     // Watch for theme changes
     $effect(() => {
-        if (!browser) return;
+        if (!browser) {
+            return;
+        }
 
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
@@ -144,13 +152,11 @@
     });
 
     // Cleanup on destroy
-    $effect(() => {
-        return () => {
-            if (chart) {
-                chart.destroy();
-                chart = null;
-            }
-        };
+    $effect(() => () => {
+        if (chart) {
+            chart.destroy();
+            chart = null;
+        }
     });
 </script>
 

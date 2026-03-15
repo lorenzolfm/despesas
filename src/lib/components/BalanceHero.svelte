@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Card, Avatar } from "$lib/components/ui";
+    import { Avatar, Card } from "$lib/components/ui";
     import type { CombinedMonthlyTotals } from "$lib/types";
     import { formatCurrency } from "$lib/utils/format";
 
@@ -11,8 +11,9 @@
 
     // Get the most recent month's balance
     const currentBalance = $derived(() => {
-        if (monthlyTotals.length === 0)
+        if (monthlyTotals.length === 0) {
             return { amount: 0, debtor: null as "Lorenzo" | "Maria" | null };
+        }
 
         // Sum up all debts across all months
         let totalDebt = 0;
