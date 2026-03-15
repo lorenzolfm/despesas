@@ -1,57 +1,62 @@
-import type { Transaction, Owner, ExpenseType, ExpenseCategory } from '$lib/types';
-import { EXPENSE_CATEGORIES } from '$lib/types';
-import { parseBRL, parseDateBR } from './format';
+import type {
+    Transaction,
+    Owner,
+    ExpenseType,
+    ExpenseCategory,
+} from "$lib/types";
+import { EXPENSE_CATEGORIES } from "$lib/types";
+import { parseBRL, parseDateBR } from "./format";
 
 // Portuguese to English type mapping
 const TYPE_MAP: Record<string, ExpenseType> = {
-	'Renda': 'Income',
-	'Despesa Familiar': 'Household',
-	'Despesa 50/50': 'Split 50/50',
-	'Despesa Pessoal': 'Personal',
-	'Pagou para o outro': 'Paid for Partner',
-	'Credito': 'Credit',
-	'Quitacao': 'Settlement'
+    Renda: "Income",
+    "Despesa Familiar": "Household",
+    "Despesa 50/50": "Split 50/50",
+    "Despesa Pessoal": "Personal",
+    "Pagou para o outro": "Paid for Partner",
+    Credito: "Credit",
+    Quitacao: "Settlement",
 };
 
 // English types (for direct mapping)
 const ENGLISH_TYPES: ExpenseType[] = [
-	'Income',
-	'Household',
-	'Split 50/50',
-	'Personal',
-	'Paid for Partner',
-	'Credit',
-	'Settlement'
+    "Income",
+    "Household",
+    "Split 50/50",
+    "Personal",
+    "Paid for Partner",
+    "Credit",
+    "Settlement",
 ];
 
-const VALID_OWNERS: Owner[] = ['Lorenzo', 'Maria'];
+const VALID_OWNERS: Owner[] = ["Lorenzo", "Maria"];
 
 /**
  * Maps Portuguese expense type to English
  */
 function mapExpenseType(type: string): ExpenseType | null {
-	// Check Portuguese mapping first
-	if (TYPE_MAP[type]) {
-		return TYPE_MAP[type];
-	}
-	// Check if it's already in English
-	if (ENGLISH_TYPES.includes(type as ExpenseType)) {
-		return type as ExpenseType;
-	}
-	return null;
+    // Check Portuguese mapping first
+    if (TYPE_MAP[type]) {
+        return TYPE_MAP[type];
+    }
+    // Check if it's already in English
+    if (ENGLISH_TYPES.includes(type as ExpenseType)) {
+        return type as ExpenseType;
+    }
+    return null;
 }
 
 /**
  * Generates a unique ID
  */
 function generateId(): string {
-	return crypto.randomUUID();
+    return crypto.randomUUID();
 }
 
 export interface ParseResult {
-	transactions: Transaction[];
-	errors: string[];
-	skipped: number;
+    transactions: Transaction[];
+    errors: string[];
+    skipped: number;
 }
 
 /**
@@ -59,114 +64,136 @@ export interface ParseResult {
  * First row should be headers
  */
 export function parseSheetData(rows: string[][]): ParseResult {
-	const errors: string[] = [];
-	let skipped = 0;
+    const errors: string[] = [];
+    let skipped = 0;
 
-	if (rows.length < 2) {
-		return { transactions: [], errors: ['Sheet is empty or has no data rows'], skipped: 0 };
-	}
+    if (rows.length < 2) {
+        return {
+            transactions: [],
+            errors: ["Sheet is empty or has no data rows"],
+            skipped: 0,
+        };
+    }
 
-	// Parse header - support both Portuguese and English
-	const headers = rows[0].map((h) => String(h).toLowerCase().trim());
+    // Parse header - support both Portuguese and English
+    const headers = rows[0].map((h) => String(h).toLowerCase().trim());
 
-	// Map column indices - support both languages
-	const ownerIdx = headers.findIndex((h) => h === 'dono' || h === 'owner');
-	const descIdx = headers.findIndex((h) => h === 'descricao' || h === 'description');
-	const amountIdx = headers.findIndex((h) => h === 'valor' || h === 'amount');
-	const typeIdx = headers.findIndex((h) => h === 'tipo' || h === 'type');
-	const dateIdx = headers.findIndex((h) => h === 'data' || h === 'date');
-	const categoryIdx = headers.findIndex((h) => h === 'categoria' || h === 'category');
+    // Map column indices - support both languages
+    const ownerIdx = headers.findIndex((h) => h === "dono" || h === "owner");
+    const descIdx = headers.findIndex(
+        (h) => h === "descricao" || h === "description",
+    );
+    const amountIdx = headers.findIndex((h) => h === "valor" || h === "amount");
+    const typeIdx = headers.findIndex((h) => h === "tipo" || h === "type");
+    const dateIdx = headers.findIndex((h) => h === "data" || h === "date");
+    const categoryIdx = headers.findIndex(
+        (h) => h === "categoria" || h === "category",
+    );
 
-	// Validate required columns (category is optional)
-	if (ownerIdx === -1 || descIdx === -1 || amountIdx === -1 || typeIdx === -1 || dateIdx === -1) {
-		return {
-			transactions: [],
-			errors: [
-				`Missing required columns. Expected: Dono/Owner, Descricao/Description, Valor/Amount, Tipo/Type, Data/Date. Found: ${headers.join(', ')}`
-			],
-			skipped: 0
-		};
-	}
+    // Validate required columns (category is optional)
+    if (
+        ownerIdx === -1 ||
+        descIdx === -1 ||
+        amountIdx === -1 ||
+        typeIdx === -1 ||
+        dateIdx === -1
+    ) {
+        return {
+            transactions: [],
+            errors: [
+                `Missing required columns. Expected: Dono/Owner, Descricao/Description, Valor/Amount, Tipo/Type, Data/Date. Found: ${headers.join(", ")}`,
+            ],
+            skipped: 0,
+        };
+    }
 
-	const transactions: Transaction[] = [];
+    const transactions: Transaction[] = [];
 
-	for (let i = 1; i < rows.length; i++) {
-		const row = rows[i];
+    for (let i = 1; i < rows.length; i++) {
+        const row = rows[i];
 
-		// Skip empty rows
-		if (!row || row.length === 0 || row.every(cell => !cell || String(cell).trim() === '')) {
-			skipped++;
-			continue;
-		}
+        // Skip empty rows
+        if (
+            !row ||
+            row.length === 0 ||
+            row.every((cell) => !cell || String(cell).trim() === "")
+        ) {
+            skipped++;
+            continue;
+        }
 
-		const owner = String(row[ownerIdx] ?? '').trim();
-		const description = String(row[descIdx] ?? '').trim();
-		const amountStr = String(row[amountIdx] ?? '').trim();
-		const typeStr = String(row[typeIdx] ?? '').trim();
-		const dateStr = String(row[dateIdx] ?? '').trim();
-		const categoryStr = categoryIdx >= 0 ? String(row[categoryIdx] ?? '').trim() : '';
+        const owner = String(row[ownerIdx] ?? "").trim();
+        const description = String(row[descIdx] ?? "").trim();
+        const amountStr = String(row[amountIdx] ?? "").trim();
+        const typeStr = String(row[typeIdx] ?? "").trim();
+        const dateStr = String(row[dateIdx] ?? "").trim();
+        const categoryStr =
+            categoryIdx >= 0 ? String(row[categoryIdx] ?? "").trim() : "";
 
-		// Validate owner
-		if (!VALID_OWNERS.includes(owner as Owner)) {
-			errors.push(`Row ${i + 1}: Invalid owner "${owner}". Expected Lorenzo or Maria.`);
-			skipped++;
-			continue;
-		}
+        // Validate owner
+        if (!VALID_OWNERS.includes(owner as Owner)) {
+            errors.push(
+                `Row ${i + 1}: Invalid owner "${owner}". Expected Lorenzo or Maria.`,
+            );
+            skipped++;
+            continue;
+        }
 
-		// Validate type
-		const expenseType = mapExpenseType(typeStr);
-		if (!expenseType) {
-			errors.push(`Row ${i + 1}: Invalid type "${typeStr}".`);
-			skipped++;
-			continue;
-		}
+        // Validate type
+        const expenseType = mapExpenseType(typeStr);
+        if (!expenseType) {
+            errors.push(`Row ${i + 1}: Invalid type "${typeStr}".`);
+            skipped++;
+            continue;
+        }
 
-		// Parse amount
-		const amount = parseBRL(amountStr);
-		if (amount === 0 && !amountStr.includes('0')) {
-			errors.push(`Row ${i + 1}: Invalid amount "${amountStr}".`);
-			skipped++;
-			continue;
-		}
+        // Parse amount
+        const amount = parseBRL(amountStr);
+        if (amount === 0 && !amountStr.includes("0")) {
+            errors.push(`Row ${i + 1}: Invalid amount "${amountStr}".`);
+            skipped++;
+            continue;
+        }
 
-		// Parse date
-		const date = parseDateBR(dateStr);
-		if (isNaN(date.getTime())) {
-			errors.push(`Row ${i + 1}: Invalid date "${dateStr}".`);
-			skipped++;
-			continue;
-		}
+        // Parse date
+        const date = parseDateBR(dateStr);
+        if (isNaN(date.getTime())) {
+            errors.push(`Row ${i + 1}: Invalid date "${dateStr}".`);
+            skipped++;
+            continue;
+        }
 
-		// Parse category (optional - only set if valid)
-		const category: ExpenseCategory | undefined =
-			categoryStr && EXPENSE_CATEGORIES.includes(categoryStr as ExpenseCategory)
-				? (categoryStr as ExpenseCategory)
-				: undefined;
+        // Parse category (optional - only set if valid)
+        const category: ExpenseCategory | undefined =
+            categoryStr &&
+            EXPENSE_CATEGORIES.includes(categoryStr as ExpenseCategory)
+                ? (categoryStr as ExpenseCategory)
+                : undefined;
 
-		transactions.push({
-			id: generateId(),
-			rowNumber: i + 1, // 1-indexed (row 1 is header, row 2 is first data = i=1)
-			owner: owner as Owner,
-			description,
-			amount,
-			type: expenseType,
-			date,
-			category
-		});
-	}
+        transactions.push({
+            id: generateId(),
+            rowNumber: i + 1, // 1-indexed (row 1 is header, row 2 is first data = i=1)
+            owner: owner as Owner,
+            description,
+            amount,
+            type: expenseType,
+            date,
+            category,
+        });
+    }
 
-	return { transactions, errors, skipped };
+    return { transactions, errors, skipped };
 }
 
 // English to Portuguese type mapping (reverse of TYPE_MAP)
 const REVERSE_TYPE_MAP: Record<ExpenseType, string> = {
-	'Income': 'Renda',
-	'Household': 'Despesa Familiar',
-	'Split 50/50': 'Despesa 50/50',
-	'Personal': 'Despesa Pessoal',
-	'Paid for Partner': 'Pagou para o outro',
-	'Credit': 'Credito',
-	'Settlement': 'Quitacao'
+    Income: "Renda",
+    Household: "Despesa Familiar",
+    "Split 50/50": "Despesa 50/50",
+    Personal: "Despesa Pessoal",
+    "Paid for Partner": "Pagou para o outro",
+    Credit: "Credito",
+    Settlement: "Quitacao",
 };
 
 /**
@@ -175,23 +202,25 @@ const REVERSE_TYPE_MAP: Record<ExpenseType, string> = {
  * Google Sheets will then display it according to the cell/sheet format settings
  */
 function formatDateForSheet(date: Date): string {
-	const day = date.getUTCDate().toString().padStart(2, '0');
-	const month = (date.getUTCMonth() + 1).toString().padStart(2, '0');
-	const year = date.getUTCFullYear();
-	return `${year}-${month}-${day}`;
+    const day = date.getUTCDate().toString().padStart(2, "0");
+    const month = (date.getUTCMonth() + 1).toString().padStart(2, "0");
+    const year = date.getUTCFullYear();
+    return `${year}-${month}-${day}`;
 }
 
 /**
  * Converts a transaction to a row format for Google Sheets
  * Returns: [Owner, Description, Amount, Type, Date, Category]
  */
-export function transactionToSheetRow(tx: Omit<Transaction, 'id'>): (string | number)[] {
-	return [
-		tx.owner,                          // Column A: Owner
-		tx.description,                    // Column B: Description
-		tx.amount,                         // Column C: Amount (raw number for Sheets)
-		REVERSE_TYPE_MAP[tx.type],         // Column D: Type (Portuguese)
-		formatDateForSheet(tx.date),       // Column E: Date (YYYY-MM-DD)
-		tx.category || ''                  // Column F: Category (optional)
-	];
+export function transactionToSheetRow(
+    tx: Omit<Transaction, "id">,
+): (string | number)[] {
+    return [
+        tx.owner, // Column A: Owner
+        tx.description, // Column B: Description
+        tx.amount, // Column C: Amount (raw number for Sheets)
+        REVERSE_TYPE_MAP[tx.type], // Column D: Type (Portuguese)
+        formatDateForSheet(tx.date), // Column E: Date (YYYY-MM-DD)
+        tx.category || "", // Column F: Category (optional)
+    ];
 }
