@@ -119,6 +119,19 @@
 	// Selected category for chart (default to Income)
 	let selectedChartCategory = $state<(typeof categories)[number]['key']>('totalIncome');
 
+	// Selected expense category for category line chart
+	let selectedExpenseCategory = $state<ExpenseCategory | null>(null);
+
+	// Chart data for expense category evolution
+	const categoryChartData = $derived.by(() => {
+		if (!selectedExpenseCategory) return { labels: [], data: [] };
+		const sorted = [...monthlyTotalsUpToCurrent].sort((a, b) => compareMonthKeys(a.monthKey, b.monthKey));
+		return {
+			labels: sorted.map((m) => formatMonthYear(m.monthKey)),
+			data: sorted.map((m) => m.categoryTotals[selectedExpenseCategory!] || 0)
+		};
+	});
+
 	// Get selected category info
 	const selectedCategory = $derived(
 		categories.find((c) => c.key === selectedChartCategory) || categories[0]
@@ -248,13 +261,19 @@
 						{#each EXPENSE_CATEGORIES as cat}
 							{@const amount = aggregatedCategoryTotals[cat] || 0}
 							{#if amount > 0}
-								<div class="p-2 rounded-lg border border-themed-light flex items-center gap-2">
+								<button
+									type="button"
+									onclick={() => selectedExpenseCategory = selectedExpenseCategory === cat ? null : cat}
+									aria-pressed={selectedExpenseCategory === cat}
+									class="p-2 rounded-lg border border-themed-light flex items-center gap-2 text-left transition-[transform,box-shadow,ring] cursor-pointer {selectedExpenseCategory === cat ? 'scale-[1.02] shadow-md ring-2 ring-offset-2 ring-offset-themed' : 'hover:opacity-80'}"
+									style={selectedExpenseCategory === cat ? `--tw-ring-color: ${categoryColors[cat]}` : ''}
+								>
 									<div class="w-3 h-3 rounded-full flex-shrink-0" style="background-color: {categoryColors[cat]}"></div>
 									<div class="min-w-0">
 										<p class="text-xs text-themed-secondary truncate">{EXPENSE_CATEGORY_EMOJIS[cat]} {cat}</p>
 										<p class="text-sm font-semibold font-mono text-themed">{formatBRL(amount)}</p>
 									</div>
-								</div>
+								</button>
 							{/if}
 						{/each}
 					</div>
@@ -264,6 +283,20 @@
 						</div>
 					{/if}
 				</div>
+				{#if selectedExpenseCategory && categoryChartData.labels.length > 0}
+					<div class="mt-4">
+						<h4 class="text-sm font-semibold text-themed-secondary uppercase tracking-wide mb-4">
+							{EXPENSE_CATEGORY_EMOJIS[selectedExpenseCategory]} {selectedExpenseCategory} Evolution
+						</h4>
+						<LineChart
+							labels={categoryChartData.labels}
+							data={categoryChartData.data}
+							label={selectedExpenseCategory}
+							color={categoryColors[selectedExpenseCategory] || '#928374'}
+							height={250}
+						/>
+					</div>
+				{/if}
 			</div>
 		{/if}
 	</Card>
