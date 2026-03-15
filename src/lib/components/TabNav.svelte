@@ -43,7 +43,7 @@
             class="relative flex gap-1 overflow-x-auto scrollbar-hide -mb-px scroll-snap-x"
             role="tablist"
         >
-            {#each tabs as tab, i}
+            {#each tabs as tab, i (tab.id)}
                 <button
                     bind:this={tabRefs[i]}
                     onclick={() => onTabChange(tab.id)}

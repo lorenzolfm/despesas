@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { Avatar, ThemeToggle, Button } from "$lib/components/ui";
+    import { Button, ThemeToggle } from "$lib/components/ui";
     import { signOut } from "@auth/sveltekit/client";
     import { page } from "$app/state";
 

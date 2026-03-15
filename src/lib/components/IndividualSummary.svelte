@@ -1,24 +1,24 @@
 <script lang="ts">
     import { untrack } from "svelte";
-    import type { Owner, MonthKey, ExpenseCategory } from "$lib/types";
+    import type { ExpenseCategory, MonthKey, Owner } from "$lib/types";
     import { EXPENSE_CATEGORIES, EXPENSE_CATEGORY_EMOJIS } from "$lib/types";
     import { useExpenses } from "$lib/stores/expenses.svelte";
     import {
         formatBRL,
+        formatDate,
         formatMonthYear,
         formatPercent,
-        getMonthRange,
-        formatDate,
         getMonthKey,
+        getMonthRange,
     } from "$lib/utils/format";
     import {
-        Card,
         Avatar,
         Badge,
-        Select,
+        Card,
         LineChart,
         PieChart,
         SankeyChart,
+        Select,
     } from "$lib/components/ui";
     import { transformPersonToSankeyData } from "$lib/utils/sankey";
 
@@ -35,19 +35,15 @@
 
     // Helper to compare MonthKey objects
     function compareMonthKeys(a: MonthKey, b: MonthKey): number {
-        if (a.year !== b.year) return a.year - b.year;
+        if (a.year !== b.year) {
+            return a.year - b.year;
+        }
         return a.month - b.month;
     }
 
     // Helper to convert MonthKey to string for dropdown value
     function monthKeyToString(key: MonthKey): string {
         return `${key.year}-${key.month}`;
-    }
-
-    // Helper to parse string back to MonthKey
-    function stringToMonthKey(str: string): MonthKey {
-        const [year, month] = str.split("-").map(Number);
-        return { year, month };
     }
 
     // Get current month key
@@ -225,7 +221,9 @@
 
     // Chart data for expense category evolution
     const categoryChartData = $derived.by(() => {
-        if (!selectedExpenseCategory) return { labels: [], data: [] };
+        if (!selectedExpenseCategory) {
+            return { labels: [], data: [] };
+        }
         const sorted = [...personTotalsUpToCurrent].sort((a, b) =>
             compareMonthKeys(a.monthKey, b.monthKey),
         );
@@ -244,7 +242,9 @@
 
     // Chart data - months sorted oldest to newest
     const chartData = $derived.by(() => {
-        if (!selectedChartCategory) return { labels: [], data: [] };
+        if (!selectedChartCategory) {
+            return { labels: [], data: [] };
+        }
         const sorted = [...personTotalsUpToCurrent].sort((a, b) =>
             compareMonthKeys(a.monthKey, b.monthKey),
         );
@@ -693,7 +693,7 @@
                             </h4>
                             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                 <div class="grid grid-cols-2 gap-2">
-                                    {#each EXPENSE_CATEGORIES as cat}
+                                    {#each EXPENSE_CATEGORIES as cat (cat)}
                                         {@const amount =
                                             person.categoryTotals[cat] || 0}
                                         {#if amount > 0}
@@ -1249,7 +1249,7 @@
                     </h4>
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         <div class="grid grid-cols-2 gap-2">
-                            {#each EXPENSE_CATEGORIES as cat}
+                            {#each EXPENSE_CATEGORIES as cat (cat)}
                                 {@const amount =
                                     aggregatedCategoryTotals[cat] || 0}
                                 {#if amount > 0}

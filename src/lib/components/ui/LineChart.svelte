@@ -28,26 +28,31 @@
 
     // Get theme-aware colors
     function getThemeColors() {
-        if (!browser)
+        if (!browser) {
             return {
                 text: "#928374",
                 grid: "#d5c4a1",
                 bg: "rgba(104, 157, 106, 0.1)",
             };
+        }
 
         const isDark = document.documentElement.classList.contains("dark");
         return {
             text: isDark ? "#a89984" : "#928374",
             grid: isDark ? "#3c3836" : "#d5c4a1",
-            bg: color + "20",
+            bg: `${color}20`,
         };
     }
 
     function createChart() {
-        if (!browser || !canvas) return;
+        if (!browser || !canvas) {
+            return;
+        }
 
         const ctx = canvas.getContext("2d");
-        if (!ctx) return;
+        if (!ctx) {
+            return;
+        }
 
         const themeColors = getThemeColors();
 
@@ -109,7 +114,7 @@
                         displayColors: false,
                         callbacks: {
                             label: (context) => {
-                                const value = context.parsed.y;
+                                const value = context.parsed.y ?? 0;
                                 return `R$ ${value.toLocaleString("pt-BR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
                             },
                         },
@@ -167,7 +172,9 @@
 
     // Watch for theme changes
     $effect(() => {
-        if (!browser) return;
+        if (!browser) {
+            return;
+        }
 
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
@@ -183,13 +190,11 @@
     });
 
     // Cleanup on destroy
-    $effect(() => {
-        return () => {
-            if (chart) {
-                chart.destroy();
-                chart = null;
-            }
-        };
+    $effect(() => () => {
+        if (chart) {
+            chart.destroy();
+            chart = null;
+        }
     });
 </script>
 

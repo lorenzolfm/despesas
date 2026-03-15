@@ -14,7 +14,7 @@
         name?: string;
         oninput?: (e: Event) => void;
         onchange?: (e: Event) => void;
-        autocomplete?: string;
+        autocomplete?: HTMLInputElement["autocomplete"];
         inputmode?:
             | "text"
             | "decimal"

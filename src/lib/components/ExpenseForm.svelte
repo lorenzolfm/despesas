@@ -1,23 +1,22 @@
 <script lang="ts">
-    import type { Owner, ExpenseType, ExpenseCategory } from "$lib/types";
+    import type { ExpenseCategory, ExpenseType, Owner } from "$lib/types";
     import {
-        EXPENSE_TYPES,
         EXPENSE_CATEGORIES,
-        OWNERS,
-        EXPENSE_TYPE_EMOJIS,
         EXPENSE_CATEGORY_EMOJIS,
+        EXPENSE_TYPES,
+        EXPENSE_TYPE_EMOJIS,
+        OWNERS,
     } from "$lib/types";
-    import { useExpenses } from "$lib/stores/expenses.svelte";
     import {
-        Card,
-        Button,
-        Input,
-        Select,
         Avatar,
+        Button,
+        Card,
         DatePicker,
+        Input,
         Modal,
+        Select,
     } from "$lib/components/ui";
-    import { addMonths, formatDate, formatBRL } from "$lib/utils/format";
+    import { addMonths, formatBRL, formatDate } from "$lib/utils/format";
     import { page } from "$app/state";
 
     interface Props {
@@ -26,13 +25,13 @@
 
     let { onSuccess }: Props = $props();
 
-    const expenses = useExpenses();
-
     function getDefaultOwner(): Owner {
         const session = page.data.session;
         const name = session?.user?.name?.toLowerCase() ?? "";
         const email = session?.user?.email?.toLowerCase() ?? "";
-        if (name.includes("maria") || email.includes("maria")) return "Maria";
+        if (name.includes("maria") || email.includes("maria")) {
+            return "Maria";
+        }
         return "Lorenzo";
     }
 
@@ -49,7 +48,6 @@
 
     let error = $state("");
     let errorShake = $state(false);
-    let success = $state(false);
     let successCount = $state(1);
     let isSubmitting = $state(false);
     let showConfirmModal = $state(false);
@@ -72,7 +70,6 @@
 
     const showInstallmentPreview = $derived(installments > 1);
 
-    const ownerOptions = OWNERS.map((o) => ({ value: o, label: o }));
     const categoryOptions = [
         { value: "", label: "No category" },
         ...EXPENSE_CATEGORIES.map((c) => ({
@@ -98,7 +95,6 @@
     function handleSubmit(e: Event) {
         e.preventDefault();
         error = "";
-        success = false;
 
         // Validation
         if (!description.trim()) {
@@ -137,7 +133,9 @@
     }
 
     async function handleConfirm() {
-        if (!confirmData) return;
+        if (!confirmData) {
+            return;
+        }
 
         isSubmitting = true;
         showConfirmModal = false;
@@ -367,7 +365,7 @@
                         >Who paid?</legend
                     >
                     <div class="flex gap-2">
-                        {#each OWNERS as o}
+                        {#each OWNERS as o (o)}
                             <button
                                 type="button"
                                 onclick={() => (owner = o)}
@@ -401,7 +399,7 @@
                         >Type</legend
                     >
                     <div class="flex flex-wrap gap-2">
-                        {#each EXPENSE_TYPES as t}
+                        {#each EXPENSE_TYPES as t (t)}
                             <button
                                 type="button"
                                 onclick={() => (type = t)}

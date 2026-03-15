@@ -1,6 +1,6 @@
 import { SvelteKitAuth } from "@auth/sveltekit";
 import Google from "@auth/sveltekit/providers/google";
-import { redirect, type Handle } from "@sveltejs/kit";
+import { type Handle, redirect } from "@sveltejs/kit";
 import { sequence } from "@sveltejs/kit/hooks";
 import { env } from "$env/dynamic/private";
 
@@ -14,8 +14,12 @@ const { handle: authHandle } = SvelteKitAuth({
     providers: [Google],
     callbacks: {
         signIn({ profile }) {
-            if (!profile?.email) return false;
-            if (ALLOWED_EMAILS.length === 0) return true;
+            if (!profile?.email) {
+                return false;
+            }
+            if (ALLOWED_EMAILS.length === 0) {
+                return true;
+            }
             return ALLOWED_EMAILS.includes(profile.email);
         },
     },

@@ -185,8 +185,12 @@ export function formatRelativeDate(date: Date): string {
     const isToday = date.toDateString() === today.toDateString();
     const isYesterday = date.toDateString() === yesterday.toDateString();
 
-    if (isToday) return "Today";
-    if (isYesterday) return "Yesterday";
+    if (isToday) {
+        return "Today";
+    }
+    if (isYesterday) {
+        return "Yesterday";
+    }
     return formatDate(date);
 }
 

@@ -1,6 +1,6 @@
 <script lang="ts">
     import { onMount } from "svelte";
-    import { fly, fade } from "svelte/transition";
+    import { fade } from "svelte/transition";
     import Header from "$lib/components/Header.svelte";
     import TabNav from "$lib/components/TabNav.svelte";
     import BalanceHero from "$lib/components/BalanceHero.svelte";
@@ -8,7 +8,7 @@
     import TransactionTable from "$lib/components/TransactionTable.svelte";
     import CombinedSummary from "$lib/components/CombinedSummary.svelte";
     import IndividualSummary from "$lib/components/IndividualSummary.svelte";
-    import { Modal, Button } from "$lib/components/ui";
+    import { Button } from "$lib/components/ui";
     import { useExpenses } from "$lib/stores/expenses.svelte";
     import type { Transaction } from "$lib/types";
 
@@ -16,8 +16,6 @@
 
     type Tab = "transactions" | "summary" | "lorenzo" | "maria";
     let activeTab = $state<Tab>("transactions");
-    let showClearModal = $state(false);
-
     // Loading states for Google Sheets data
     let isLoading = $state(true);
     let loadError = $state<string | null>(null);
@@ -64,11 +62,6 @@
 
     function handleTabChange(tab: Tab) {
         activeTab = tab;
-    }
-
-    function handleClearData() {
-        expenses.clearAllTransactions();
-        showClearModal = false;
     }
 
     function handleRefresh() {
@@ -150,7 +143,7 @@
                     <div class="p-4 border-b border-themed-light">
                         <div class="h-11 skeleton rounded-xl"></div>
                     </div>
-                    {#each Array(4) as _}
+                    {#each Array(4) as _, i (i)}
                         <div class="px-4 py-3 flex items-center gap-3">
                             <div
                                 class="w-8 h-8 rounded-full skeleton flex-shrink-0"

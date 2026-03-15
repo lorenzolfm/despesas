@@ -94,7 +94,9 @@
     function toggleCalendar() {
         if (!disabled) {
             showCalendar = !showCalendar;
-            if (showCalendar) view = "days";
+            if (showCalendar) {
+                view = "days";
+            }
         }
     }
 
@@ -159,7 +161,9 @@
     }
 
     function isSelected(day: number): boolean {
-        if (!value) return false;
+        if (!value) {
+            return false;
+        }
         return (
             day === value.getDate() &&
             viewDate.getMonth() === value.getMonth() &&
@@ -298,7 +302,7 @@
 
                 <!-- Day names -->
                 <div class="grid grid-cols-7 gap-1 mb-1">
-                    {#each dayNames as day}
+                    {#each dayNames as day (day)}
                         <div
                             class="text-center text-xs font-medium text-themed-tertiary py-1"
                         >
@@ -309,7 +313,7 @@
 
                 <!-- Days grid -->
                 <div class="grid grid-cols-7 gap-1">
-                    {#each calendarDays as day}
+                    {#each calendarDays as day, i (i)}
                         {#if day === null}
                             <div></div>
                         {:else}
@@ -376,7 +380,7 @@
 
                 <!-- Months grid -->
                 <div class="grid grid-cols-3 gap-2">
-                    {#each shortMonthNames as month, i}
+                    {#each shortMonthNames as month, i (i)}
                         <button
                             type="button"
                             onclick={() => selectMonth(i)}

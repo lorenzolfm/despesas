@@ -322,7 +322,7 @@ export const DELETE: RequestHandler = async ({ request }) => {
                     {
                         deleteDimension: {
                             range: {
-                                sheetId: sheetId,
+                                sheetId,
                                 dimension: "ROWS",
                                 startIndex: rowNumber - 1,
                                 endIndex: rowNumber,
