@@ -213,7 +213,7 @@ function formatDateForSheet(date: Date): string {
  * Returns: [Owner, Description, Amount, Type, Date, Category]
  */
 export function transactionToSheetRow(
-    tx: Omit<Transaction, "id">,
+    tx: Omit<Transaction, "id" | "rowNumber">,
 ): (string | number)[] {
     return [
         tx.owner, // Column A: Owner
